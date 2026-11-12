@@ -1,7 +1,6 @@
 import React from 'react';
 import { createBrowserRouter, Navigate } from 'react-router-dom';
 import { MainLayout } from '../components/layout/MainLayout';
-import { ErrorBoundary } from '../components/common/ErrorBoundary';
 import { DashboardOverview } from '../features/dashboard/DashboardOverview';
 import { ChitGroupList } from '../features/chit-groups/ChitGroupList';
 import { ChitGroupDetail } from '../features/chit-groups/ChitGroupDetail';
@@ -19,7 +18,6 @@ export const router = createBrowserRouter([
   {
     path: '/',
     element: <MainLayout />,
-    errorElement: <ErrorBoundary />,
     children: [
       { index: true, element: <DashboardOverview /> },
       { path: 'chit-groups', element: <ChitGroupList /> },

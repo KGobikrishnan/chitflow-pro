@@ -3,53 +3,53 @@ import React from 'react';
 const statusConfigs = {
   PAID: {
     label: 'Paid',
-    style: 'bg-[#34C759]/12 text-[#248A3D] dark:text-[#30D158] border-[#34C759]/20',
-    dot: 'bg-[#34C759]',
+    style: 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-500/20',
+    dot: 'bg-emerald-500',
   },
   COMPLETED: {
     label: 'Completed',
-    style: 'bg-[#34C759]/12 text-[#248A3D] dark:text-[#30D158] border-[#34C759]/20',
-    dot: 'bg-[#34C759]',
+    style: 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-500/20',
+    dot: 'bg-emerald-500',
   },
   ACTIVE: {
     label: 'Active',
-    style: 'bg-[#007AFF]/12 text-[#0062CC] dark:text-[#0A84FF] border-[#007AFF]/20',
-    dot: 'bg-[#007AFF]',
+    style: 'bg-indigo-500/10 text-indigo-700 dark:text-indigo-400 border-indigo-500/20',
+    dot: 'bg-indigo-500',
   },
   PARTIALLY_PAID: {
     label: 'Partial',
-    style: 'bg-[#FF9500]/12 text-[#C97100] dark:text-[#FF9F0A] border-[#FF9500]/20',
-    dot: 'bg-[#FF9500]',
+    style: 'bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-500/20',
+    dot: 'bg-amber-500',
   },
   PENDING: {
     label: 'Pending',
-    style: 'bg-[#5856D6]/12 text-[#4644B2] dark:text-[#5E5CE6] border-[#5856D6]/20',
-    dot: 'bg-[#5856D6]',
+    style: 'bg-sky-500/10 text-sky-700 dark:text-sky-400 border-sky-500/20',
+    dot: 'bg-sky-500',
   },
   UPCOMING: {
     label: 'Upcoming',
-    style: 'bg-[#8E8E93]/12 text-[#636366] dark:text-[#AEAEB2] border-[#8E8E93]/20',
-    dot: 'bg-[#8E8E93]',
+    style: 'bg-slate-500/10 text-slate-600 dark:text-slate-400 border-slate-500/20',
+    dot: 'bg-slate-400',
   },
   OVERDUE: {
     label: 'Overdue',
-    style: 'bg-[#FF3B30]/12 text-[#D70015] dark:text-[#FF453A] border-[#FF3B30]/20',
-    dot: 'bg-[#FF3B30]',
+    style: 'bg-rose-500/10 text-rose-700 dark:text-rose-400 border-rose-500/20',
+    dot: 'bg-rose-500',
   },
   SUSPENDED: {
     label: 'Suspended',
-    style: 'bg-[#FF3B30]/12 text-[#D70015] dark:text-[#FF453A] border-[#FF3B30]/20',
-    dot: 'bg-[#FF3B30]',
+    style: 'bg-red-500/10 text-red-700 dark:text-red-400 border-red-500/20',
+    dot: 'bg-red-500',
   },
   INACTIVE: {
     label: 'Inactive',
-    style: 'bg-[#8E8E93]/12 text-[#636366] dark:text-[#AEAEB2] border-[#8E8E93]/20',
-    dot: 'bg-[#8E8E93]',
+    style: 'bg-slate-500/10 text-slate-600 dark:text-slate-400 border-slate-500/20',
+    dot: 'bg-slate-400',
   },
   PAUSED: {
     label: 'Paused',
-    style: 'bg-[#FF9500]/12 text-[#C97100] dark:text-[#FF9F0A] border-[#FF9500]/20',
-    dot: 'bg-[#FF9500]',
+    style: 'bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-500/20',
+    dot: 'bg-amber-500',
   },
 };
 
@@ -59,7 +59,7 @@ export const StatusBadge = ({ status, className = '' }) => {
 
   return (
     <span
-      className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold tracking-tight border ${conf.style} ${className}`}
+      className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[11px] font-medium tracking-tight border ${conf.style} ${className}`}
     >
       <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${conf.dot}`} />
       {conf.label}
