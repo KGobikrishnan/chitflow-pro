@@ -12,7 +12,9 @@ import {
   Layers,
   Users,
   CheckCircle2,
-  Filter,
+  ChevronRight,
+  Sparkles,
+  Trophy,
 } from 'lucide-react';
 import {
   ResponsiveContainer,
@@ -38,13 +40,11 @@ export const DashboardOverview = () => {
   const transactions = useAppStore((state) => state.transactions);
   const payouts = useAppStore((state) => state.payouts);
 
-  const [timeframe, setTimeframe] = useState('ALL');
+  const [activeSegment, setActiveSegment] = useState('ALL');
 
-  // Dynamic state-derived metrics
   const kpis = analyticsService.calculateKPIs({ groups, members, installments, payouts });
   const trendData = analyticsService.getMonthlyCollectionTrend(transactions);
 
-  // Group-wise performance summary
   const groupPerformance = groups.map((g) => {
     const gInst = installments.filter((ins) => ins.groupId === g.id);
     const expected = gInst.reduce((s, ins) => s + (ins.expectedAmount || 0), 0);
@@ -62,28 +62,11 @@ export const DashboardOverview = () => {
     };
   });
 
-  // Recent 6 transactions
   const recentTransactions = [...transactions].slice(0, 6);
-
-  // Next upcoming or pending installments
   const upcomingCollections = installments
     .filter((ins) => ins.status === 'PENDING' || ins.status === 'UPCOMING')
     .slice(0, 5);
 
-  const handleExportDashboard = () => {
-    const data = transactions.map((tx) => ({
-      'Transaction ID': tx.id,
-      'Receipt Number': tx.receiptNumber,
-      'Payment Date': tx.paymentDate,
-      'Member ID': tx.memberId,
-      'Amount (INR)': tx.amount,
-      'Method': tx.paymentMethod,
-      'Reference': tx.referenceNumber,
-    }));
-    exportToCSV(data, `ChitFlow_Dashboard_Transactions_${new Date().toISOString().split('T')[0]}.csv`);
-  };
-
-  // Distribution figures
   const totalInstallmentCount =
     kpis.distribution.paid +
     kpis.distribution.partiallyPaid +
@@ -95,35 +78,46 @@ export const DashboardOverview = () => {
   const pendingShare = totalInstallmentCount > 0 ? Math.round((kpis.distribution.pending / totalInstallmentCount) * 100) : 0;
   const overdueShare = totalInstallmentCount > 0 ? Math.round((kpis.distribution.overdue / totalInstallmentCount) * 100) : 0;
 
+  const handleExport = () => {
+    const data = transactions.map((tx) => ({
+      'Receipt #': tx.receiptNumber,
+      'Date': tx.paymentDate,
+      'Member ID': tx.memberId,
+      'Amount (INR)': tx.amount,
+      'Channel': tx.paymentMethod,
+      'Reference': tx.referenceNumber,
+    }));
+    exportToCSV(data, `ChitFlow_Transactions_${new Date().toISOString().split('T')[0]}.csv`);
+  };
+
   return (
     <div className="space-y-6">
-      {/* Financial Operations Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-4 border-b border-[#e2e4e9] dark:border-[#1e283d]">
+      {/* Apple Large Title Header */}
+      <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
         <div>
-          <div className="flex items-center space-x-2">
-            <h1 className="text-xl font-bold tracking-tight text-slate-900 dark:text-white">
-              Financial Overview
-            </h1>
-            <span className="px-2 py-0.5 rounded text-[10px] font-mono font-medium bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
-              LIVE STATE
-            </span>
-          </div>
-          <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-            Monitor verified chit subscriptions, monthly collection curves, and liquidity disbursements.
+          <span className="text-[11px] font-bold text-[#007AFF] uppercase tracking-wider block mb-0.5">
+            Real-time Operations
+          </span>
+          <h1 className="text-3xl font-extrabold tracking-tight text-[#000000] dark:text-[#FFFFFF]">
+            Financial Overview
+          </h1>
+          <p className="text-xs text-[#8E8E93] mt-0.5 font-medium">
+            Tamil Nadu Chit Funds Act compliant ledger & subscription analytics
           </p>
         </div>
 
-        <div className="flex items-center space-x-2">
+        {/* Apple Segmented Filter & Actions */}
+        <div className="flex items-center space-x-2.5">
           <button
-            onClick={handleExportDashboard}
-            className="px-3 py-1.5 text-xs font-medium text-slate-700 dark:text-slate-300 bg-white dark:bg-[#111625] border border-[#e2e4e9] dark:border-[#1e283d] rounded-md hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors flex items-center gap-1.5"
+            onClick={handleExport}
+            className="ios-pill-btn px-4 py-2 text-xs font-semibold text-slate-800 dark:text-slate-200 bg-white dark:bg-[#1C1C1E] border border-black/5 dark:border-white/10 shadow-[0_2px_8px_rgba(0,0,0,0.04)] hover:bg-[#F2F2F7] flex items-center gap-1.5"
           >
-            <Download className="w-3.5 h-3.5 text-slate-400" />
-            <span>Export Feed</span>
+            <Download className="w-3.5 h-3.5 text-[#8E8E93]" />
+            <span>Export CSV</span>
           </button>
           <button
             onClick={() => navigate('/payments')}
-            className="px-3.5 py-1.5 text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-700 rounded-md shadow-xs transition-colors flex items-center gap-1.5"
+            className="ios-pill-btn px-4 py-2 text-xs text-white bg-[#007AFF] hover:bg-[#0062CC] shadow-[0_3px_12px_rgba(0,122,255,0.35)] flex items-center gap-1.5"
           >
             <CreditCard className="w-3.5 h-3.5" />
             <span>Collect Installment</span>
@@ -131,131 +125,141 @@ export const DashboardOverview = () => {
         </div>
       </div>
 
-      {/* Tier 1: Primary Executive Financial Metrics */}
+      {/* Apple iOS Modern Cards Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {/* Total Collected */}
-        <div className="bg-white dark:bg-[#111625] border border-[#e2e4e9] dark:border-[#1e283d] rounded-lg p-5 shadow-xs relative overflow-hidden">
-          <div className="flex items-center justify-between text-xs font-medium text-slate-500 dark:text-slate-400">
-            <span>Total Collected Inflow</span>
-            <span className="text-[11px] font-mono text-emerald-600 dark:text-emerald-400 font-semibold bg-emerald-500/10 px-1.5 py-0.5 rounded">
-              VERIFIED
+        <div className="ios-card p-5 relative overflow-hidden transition-all hover:shadow-[0_4px_16px_rgba(0,0,0,0.06)]">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-bold text-[#8E8E93] uppercase tracking-wider">
+              Total Realized Inflow
             </span>
+            <div className="w-8 h-8 rounded-full bg-[#34C759]/15 text-[#34C759] flex items-center justify-center">
+              <CheckCircle2 className="w-4 h-4" />
+            </div>
           </div>
-          <div className="mt-3 text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
+          <div className="mt-3 text-3xl font-bold tracking-tight text-[#000000] dark:text-[#FFFFFF]">
             {formatCurrency(kpis.totalCollected)}
           </div>
-          <div className="mt-2 flex items-center text-[11px] text-slate-500 dark:text-slate-400">
-            <span className="text-emerald-600 dark:text-emerald-400 font-semibold flex items-center gap-0.5 mr-1.5">
-              <TrendingUp className="w-3 h-3" /> {kpis.collectionEfficiency}%
-            </span>
-            <span>cumulative collection efficiency</span>
+          <div className="mt-2 flex items-center text-xs font-semibold text-[#34C759]">
+            <TrendingUp className="w-3.5 h-3.5 mr-1" />
+            <span>{kpis.collectionEfficiency}% overall realization rate</span>
           </div>
         </div>
 
         {/* Expected Monthly Collection */}
-        <div className="bg-white dark:bg-[#111625] border border-[#e2e4e9] dark:border-[#1e283d] rounded-lg p-5 shadow-xs">
-          <div className="flex items-center justify-between text-xs font-medium text-slate-500 dark:text-slate-400">
-            <span>Monthly Expected Run-Rate</span>
-            <span className="text-[11px] font-mono text-indigo-600 dark:text-indigo-400 font-semibold bg-indigo-500/10 px-1.5 py-0.5 rounded">
-              MONTHLY
+        <div className="ios-card p-5 relative overflow-hidden transition-all hover:shadow-[0_4px_16px_rgba(0,0,0,0.06)]">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-bold text-[#8E8E93] uppercase tracking-wider">
+              Expected Monthly Target
             </span>
+            <div className="w-8 h-8 rounded-full bg-[#007AFF]/15 text-[#007AFF] flex items-center justify-center">
+              <Clock className="w-4 h-4" />
+            </div>
           </div>
-          <div className="mt-3 text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
+          <div className="mt-3 text-3xl font-bold tracking-tight text-[#000000] dark:text-[#FFFFFF]">
             {formatCurrency(kpis.expectedMonthlyCollection)}
           </div>
-          <div className="mt-2 text-[11px] text-slate-500 dark:text-slate-400">
-            <span>Scheduled across </span>
-            <span className="font-semibold text-slate-800 dark:text-slate-200">{kpis.activeChits} active chit circles</span>
+          <div className="mt-2 text-xs text-[#8E8E93] font-medium">
+            Across {kpis.activeChits} active subscription circles
           </div>
         </div>
 
-        {/* Outstanding / Pending Amount */}
-        <div className="bg-white dark:bg-[#111625] border border-[#e2e4e9] dark:border-[#1e283d] rounded-lg p-5 shadow-xs">
-          <div className="flex items-center justify-between text-xs font-medium text-slate-500 dark:text-slate-400">
-            <span>Outstanding Due Balance</span>
-            <span className="text-[11px] font-mono text-amber-600 dark:text-amber-400 font-semibold bg-amber-500/10 px-1.5 py-0.5 rounded">
-              PENDING
+        {/* Outstanding Dues */}
+        <div className="ios-card p-5 relative overflow-hidden transition-all hover:shadow-[0_4px_16px_rgba(0,0,0,0.06)]">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-bold text-[#8E8E93] uppercase tracking-wider">
+              Outstanding Receivables
             </span>
+            <div className="w-8 h-8 rounded-full bg-[#FF9500]/15 text-[#FF9500] flex items-center justify-center">
+              <Layers className="w-4 h-4" />
+            </div>
           </div>
-          <div className="mt-3 text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
+          <div className="mt-3 text-3xl font-bold tracking-tight text-[#000000] dark:text-[#FFFFFF]">
             {formatCurrency(kpis.totalPending)}
           </div>
-          <div className="mt-2 text-[11px] text-slate-500 dark:text-slate-400">
-            <span>Remaining balance over group tenures</span>
+          <div className="mt-2 text-xs text-[#8E8E93] font-medium">
+            Scheduled across remaining circle tenures
           </div>
         </div>
 
-        {/* Overdue / Defaults */}
-        <div className="bg-white dark:bg-[#111625] border border-[#e2e4e9] dark:border-[#1e283d] rounded-lg p-5 shadow-xs">
-          <div className="flex items-center justify-between text-xs font-medium text-slate-500 dark:text-slate-400">
-            <span>Delayed & Overdue Dues</span>
-            <span className="text-[11px] font-mono text-rose-600 dark:text-rose-400 font-semibold bg-rose-500/10 px-1.5 py-0.5 rounded">
-              ACTION
+        {/* Overdue */}
+        <div className="ios-card p-5 relative overflow-hidden transition-all hover:shadow-[0_4px_16px_rgba(0,0,0,0.06)]">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-bold text-[#8E8E93] uppercase tracking-wider">
+              Overdue Beyond Grace
             </span>
+            <div className="w-8 h-8 rounded-full bg-[#FF3B30]/15 text-[#FF3B30] flex items-center justify-center">
+              <AlertCircle className="w-4 h-4" />
+            </div>
           </div>
-          <div className="mt-3 text-2xl font-bold tracking-tight text-rose-600 dark:text-rose-400">
+          <div className="mt-3 text-3xl font-bold tracking-tight text-[#FF3B30]">
             {formatCurrency(kpis.overdueAmount)}
           </div>
-          <div className="mt-2 flex items-center text-[11px] text-slate-500 dark:text-slate-400">
-            <span className="font-semibold text-rose-600 dark:text-rose-400 mr-1.5">
-              {kpis.overdueCount} installments
-            </span>
-            <span>past grace period</span>
+          <div className="mt-2 text-xs text-[#FF3B30] font-semibold">
+            {kpis.overdueCount} delayed member installments
           </div>
         </div>
       </div>
 
-      {/* Tier 2: Secondary Operational Status Ribbon */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 bg-white dark:bg-[#111625] p-3.5 rounded-lg border border-[#e2e4e9] dark:border-[#1e283d] text-xs">
-        <div className="flex items-center space-x-2.5 px-3 border-r border-[#e2e4e9] dark:border-[#1e283d]">
-          <Layers className="w-4 h-4 text-indigo-500 shrink-0" />
-          <div className="truncate">
-            <span className="text-slate-400 text-[10px] uppercase font-mono block">Active Circles</span>
-            <span className="font-bold text-slate-800 dark:text-slate-200">{kpis.activeChits} / {groups.length} groups</span>
+      {/* Secondary Apple Status Ribbon */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        <div className="ios-card p-3.5 flex items-center space-x-3">
+          <div className="w-10 h-10 rounded-[12px] bg-[#5856D6] text-white flex items-center justify-center shadow-[0_2px_6px_rgba(88,86,214,0.3)]">
+            <Layers className="w-5 h-5" />
+          </div>
+          <div>
+            <div className="text-[11px] font-bold text-[#8E8E93] uppercase">Active Chits</div>
+            <div className="text-sm font-bold text-slate-900 dark:text-white">{kpis.activeChits} / {groups.length} Circles</div>
           </div>
         </div>
 
-        <div className="flex items-center space-x-2.5 px-3 border-r border-[#e2e4e9] dark:border-[#1e283d]">
-          <Users className="w-4 h-4 text-sky-500 shrink-0" />
-          <div className="truncate">
-            <span className="text-slate-400 text-[10px] uppercase font-mono block">Enrolled Members</span>
-            <span className="font-bold text-slate-800 dark:text-slate-200">{kpis.totalMembers} subscribers</span>
+        <div className="ios-card p-3.5 flex items-center space-x-3">
+          <div className="w-10 h-10 rounded-[12px] bg-[#00C7BE] text-white flex items-center justify-center shadow-[0_2px_6px_rgba(0,199,190,0.3)]">
+            <Users className="w-5 h-5" />
+          </div>
+          <div>
+            <div className="text-[11px] font-bold text-[#8E8E93] uppercase">Subscribers</div>
+            <div className="text-sm font-bold text-slate-900 dark:text-white">{kpis.totalMembers} Enrolled</div>
           </div>
         </div>
 
-        <div className="flex items-center space-x-2.5 px-3 border-r border-[#e2e4e9] dark:border-[#1e283d]">
-          <TrendingUp className="w-4 h-4 text-emerald-500 shrink-0" />
-          <div className="truncate">
-            <span className="text-slate-400 text-[10px] uppercase font-mono block">Disbursed Payouts</span>
-            <span className="font-bold text-slate-800 dark:text-slate-200">{formatCurrency(kpis.totalPayouts)}</span>
+        <div className="ios-card p-3.5 flex items-center space-x-3">
+          <div className="w-10 h-10 rounded-[12px] bg-[#34C759] text-white flex items-center justify-center shadow-[0_2px_6px_rgba(52,199,89,0.3)]">
+            <TrendingUp className="w-5 h-5" />
+          </div>
+          <div>
+            <div className="text-[11px] font-bold text-[#8E8E93] uppercase">Payouts Released</div>
+            <div className="text-sm font-bold text-slate-900 dark:text-white">{formatCurrency(kpis.totalPayouts)}</div>
           </div>
         </div>
 
-        <div className="flex items-center space-x-2.5 px-3">
-          <Clock className="w-4 h-4 text-amber-500 shrink-0" />
-          <div className="truncate">
-            <span className="text-slate-400 text-[10px] uppercase font-mono block">Completed Draws</span>
-            <span className="font-bold text-slate-800 dark:text-slate-200">{payouts.length} auctions held</span>
+        <div className="ios-card p-3.5 flex items-center space-x-3">
+          <div className="w-10 h-10 rounded-[12px] bg-[#AF52DE] text-white flex items-center justify-center shadow-[0_2px_6px_rgba(175,82,222,0.3)]">
+            <Trophy className="w-5 h-5" />
+          </div>
+          <div>
+            <div className="text-[11px] font-bold text-[#8E8E93] uppercase">Auctions Conducted</div>
+            <div className="text-sm font-bold text-slate-900 dark:text-white">{payouts.length} Draws Completed</div>
           </div>
         </div>
       </div>
 
-      {/* Main Analytics: Interactive Area Curve & Health Distribution */}
+      {/* Main Apple Inflow Curve & Health Bar */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Main Chart */}
-        <div className="lg:col-span-2 bg-white dark:bg-[#111625] border border-[#e2e4e9] dark:border-[#1e283d] rounded-lg p-5 shadow-xs">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-4">
+        {/* Apple Chart View */}
+        <div className="lg:col-span-2 ios-card p-6">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6">
             <div>
-              <h3 className="text-sm font-bold text-slate-900 dark:text-white">
-                Collection Realization Curve
+              <h3 className="text-base font-bold text-slate-900 dark:text-white">
+                Monthly Realized Inflow Curve
               </h3>
-              <p className="text-xs text-slate-500 dark:text-slate-400">
-                Monthly actual subscription collection volume vs cycle targets
+              <p className="text-xs text-[#8E8E93] mt-0.5">
+                Monthly realized subscription cash flow against cycle targets
               </p>
             </div>
-            <div className="flex items-center gap-1.5 text-xs font-mono">
-              <span className="inline-block w-2.5 h-2.5 rounded-full bg-indigo-600" />
-              <span className="text-slate-600 dark:text-slate-400 mr-3">Collected (INR)</span>
+            <div className="flex items-center space-x-2 text-xs font-semibold text-[#007AFF]">
+              <span className="w-2.5 h-2.5 rounded-full bg-[#007AFF] shadow-[0_0_8px_rgba(0,122,255,0.6)]" />
+              <span>Realized Collection (INR)</span>
             </div>
           </div>
 
@@ -263,109 +267,109 @@ export const DashboardOverview = () => {
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart data={trendData} margin={{ top: 10, right: 10, left: -10, bottom: 0 }}>
                 <defs>
-                  <linearGradient id="curveFill" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#4338ca" stopOpacity={0.25} />
-                    <stop offset="100%" stopColor="#4338ca" stopOpacity={0.0} />
+                  <linearGradient id="appleGradient" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="#007AFF" stopOpacity={0.28} />
+                    <stop offset="100%" stopColor="#007AFF" stopOpacity={0.0} />
                   </linearGradient>
                 </defs>
-                <CartesianGrid strokeDasharray="2 2" vertical={false} stroke="#e2e4e9" strokeOpacity={0.5} />
-                <XAxis dataKey="month" tick={{ fontSize: 11, fill: '#868c98' }} tickLine={false} />
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(0,0,0,0.05)" />
+                <XAxis dataKey="month" tick={{ fontSize: 11, fill: '#8E8E93' }} tickLine={false} axisLine={false} />
                 <YAxis
                   tickFormatter={(val) => `₹${val / 1000}k`}
-                  tick={{ fontSize: 11, fill: '#868c98' }}
+                  tick={{ fontSize: 11, fill: '#8E8E93' }}
                   tickLine={false}
                   axisLine={false}
                 />
                 <Tooltip
-                  formatter={(val) => [formatCurrency(val), 'Realized']}
+                  formatter={(val) => [formatCurrency(val), 'Collected']}
                   contentStyle={{
-                    backgroundColor: '#0f172a',
-                    borderColor: '#1e293b',
-                    borderRadius: '6px',
+                    backgroundColor: 'rgba(28, 28, 30, 0.95)',
+                    borderRadius: '12px',
+                    border: 'none',
                     color: '#fff',
-                    fontSize: '11px',
-                    boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+                    fontSize: '12px',
+                    boxShadow: '0 8px 24px rgba(0,0,0,0.2)',
                   }}
                 />
                 <Area
                   type="monotone"
                   dataKey="collected"
-                  stroke="#4338ca"
-                  strokeWidth={2}
+                  stroke="#007AFF"
+                  strokeWidth={3}
                   fillOpacity={1}
-                  fill="url(#curveFill)"
+                  fill="url(#appleGradient)"
                 />
               </AreaChart>
             </ResponsiveContainer>
           </div>
         </div>
 
-        {/* Sophisticated Segmented Distribution Health */}
-        <div className="bg-white dark:bg-[#111625] border border-[#e2e4e9] dark:border-[#1e283d] rounded-lg p-5 shadow-xs flex flex-col justify-between">
+        {/* Apple Segmented Health Widget */}
+        <div className="ios-card p-6 flex flex-col justify-between">
           <div>
             <div className="flex items-center justify-between mb-1">
-              <h3 className="text-sm font-bold text-slate-900 dark:text-white">
-                Installment Status Distribution
+              <h3 className="text-base font-bold text-slate-900 dark:text-white">
+                Installment Health
               </h3>
-              <span className="text-[10px] font-mono text-slate-400">
-                {totalInstallmentCount} records
+              <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-black/5 dark:bg-white/10 text-slate-600 dark:text-slate-300">
+                {totalInstallmentCount} Total
               </span>
             </div>
-            <p className="text-xs text-slate-500 dark:text-slate-400 mb-5">
-              Live portfolio breakdown of all scheduled member payments
+            <p className="text-xs text-[#8E8E93] mb-5">
+              Live status distribution of all subscriber schedules
             </p>
 
-            {/* Segmented bar */}
-            <div className="w-full h-3 rounded-full overflow-hidden flex bg-slate-100 dark:bg-slate-800 mb-5">
-              <div style={{ width: `${paidShare}%` }} className="bg-emerald-500 h-full" title={`Paid: ${paidShare}%`} />
-              <div style={{ width: `${partialShare}%` }} className="bg-amber-500 h-full" title={`Partial: ${partialShare}%`} />
-              <div style={{ width: `${pendingShare}%` }} className="bg-sky-500 h-full" title={`Pending: ${pendingShare}%`} />
-              <div style={{ width: `${overdueShare}%` }} className="bg-rose-500 h-full" title={`Overdue: ${overdueShare}%`} />
+            {/* iOS Apple Health Style Multi-Segmented Bar */}
+            <div className="w-full h-3.5 rounded-full overflow-hidden flex bg-[#E5E5EA] dark:bg-[#2C2C2E] p-0.5 shadow-inner mb-6">
+              <div style={{ width: `${paidShare}%` }} className="bg-[#34C759] h-full rounded-l-full" title={`Paid: ${paidShare}%`} />
+              <div style={{ width: `${partialShare}%` }} className="bg-[#FF9500] h-full" title={`Partial: ${partialShare}%`} />
+              <div style={{ width: `${pendingShare}%` }} className="bg-[#5856D6] h-full" title={`Pending: ${pendingShare}%`} />
+              <div style={{ width: `${overdueShare}%` }} className="bg-[#FF3B30] h-full rounded-r-full" title={`Overdue: ${overdueShare}%`} />
             </div>
 
-            {/* Detailed metric list */}
-            <div className="space-y-3 text-xs">
-              <div className="flex items-center justify-between pb-2 border-b border-slate-100 dark:border-slate-800/80">
+            {/* Apple Details Rows */}
+            <div className="space-y-3.5 text-xs">
+              <div className="flex items-center justify-between pb-2 border-b border-black/5 dark:border-white/10">
                 <div className="flex items-center space-x-2">
-                  <span className="w-2.5 h-2.5 rounded-sm bg-emerald-500 shrink-0" />
-                  <span className="font-medium text-slate-700 dark:text-slate-300">Paid in Full</span>
+                  <span className="w-3 h-3 rounded-full bg-[#34C759] shadow-[0_1px_4px_rgba(52,199,89,0.4)]" />
+                  <span className="font-semibold text-slate-800 dark:text-slate-200">Fully Settled</span>
                 </div>
                 <div className="text-right">
                   <span className="font-bold text-slate-900 dark:text-white">{kpis.distribution.paid}</span>
-                  <span className="text-slate-400 text-[11px] ml-1.5 font-mono">({paidShare}%)</span>
+                  <span className="text-[#8E8E93] ml-1.5 font-medium">({paidShare}%)</span>
                 </div>
               </div>
 
-              <div className="flex items-center justify-between pb-2 border-b border-slate-100 dark:border-slate-800/80">
+              <div className="flex items-center justify-between pb-2 border-b border-black/5 dark:border-white/10">
                 <div className="flex items-center space-x-2">
-                  <span className="w-2.5 h-2.5 rounded-sm bg-amber-500 shrink-0" />
-                  <span className="font-medium text-slate-700 dark:text-slate-300">Partially Paid</span>
+                  <span className="w-3 h-3 rounded-full bg-[#FF9500] shadow-[0_1px_4px_rgba(255,149,0,0.4)]" />
+                  <span className="font-semibold text-slate-800 dark:text-slate-200">Partially Paid</span>
                 </div>
                 <div className="text-right">
                   <span className="font-bold text-slate-900 dark:text-white">{kpis.distribution.partiallyPaid}</span>
-                  <span className="text-slate-400 text-[11px] ml-1.5 font-mono">({partialShare}%)</span>
+                  <span className="text-[#8E8E93] ml-1.5 font-medium">({partialShare}%)</span>
                 </div>
               </div>
 
-              <div className="flex items-center justify-between pb-2 border-b border-slate-100 dark:border-slate-800/80">
+              <div className="flex items-center justify-between pb-2 border-b border-black/5 dark:border-white/10">
                 <div className="flex items-center space-x-2">
-                  <span className="w-2.5 h-2.5 rounded-sm bg-sky-500 shrink-0" />
-                  <span className="font-medium text-slate-700 dark:text-slate-300">Pending Dues</span>
+                  <span className="w-3 h-3 rounded-full bg-[#5856D6] shadow-[0_1px_4px_rgba(88,86,214,0.4)]" />
+                  <span className="font-semibold text-slate-800 dark:text-slate-200">Pending Cycles</span>
                 </div>
                 <div className="text-right">
                   <span className="font-bold text-slate-900 dark:text-white">{kpis.distribution.pending}</span>
-                  <span className="text-slate-400 text-[11px] ml-1.5 font-mono">({pendingShare}%)</span>
+                  <span className="text-[#8E8E93] ml-1.5 font-medium">({pendingShare}%)</span>
                 </div>
               </div>
 
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-2">
-                  <span className="w-2.5 h-2.5 rounded-sm bg-rose-500 shrink-0" />
-                  <span className="font-medium text-slate-700 dark:text-slate-300">Overdue Over 5d</span>
+                  <span className="w-3 h-3 rounded-full bg-[#FF3B30] shadow-[0_1px_4px_rgba(255,59,48,0.4)]" />
+                  <span className="font-semibold text-[#FF3B30]">Overdue Past Grace</span>
                 </div>
                 <div className="text-right">
-                  <span className="font-bold text-rose-600 dark:text-rose-400">{kpis.distribution.overdue}</span>
-                  <span className="text-slate-400 text-[11px] ml-1.5 font-mono">({overdueShare}%)</span>
+                  <span className="font-bold text-[#FF3B30]">{kpis.distribution.overdue}</span>
+                  <span className="text-[#8E8E93] ml-1.5 font-medium">({overdueShare}%)</span>
                 </div>
               </div>
             </div>
@@ -373,31 +377,31 @@ export const DashboardOverview = () => {
 
           <button
             onClick={() => navigate('/collections')}
-            className="mt-4 pt-3 border-t border-slate-100 dark:border-slate-800/80 text-[11px] font-semibold text-indigo-600 dark:text-indigo-400 hover:underline flex items-center justify-between"
+            className="mt-5 pt-3 border-t border-black/5 dark:border-white/10 text-xs font-bold text-[#007AFF] hover:underline flex items-center justify-between"
           >
             <span>Open Collections Matrix</span>
-            <ArrowRight className="w-3.5 h-3.5" />
+            <ChevronRight className="w-4 h-4" />
           </button>
         </div>
       </div>
 
-      {/* Tier 3: Group Performance Bars */}
-      <div className="bg-white dark:bg-[#111625] border border-[#e2e4e9] dark:border-[#1e283d] rounded-lg p-5 shadow-xs">
-        <div className="flex items-center justify-between mb-4">
+      {/* Circle Performance Cards */}
+      <div className="ios-card p-6">
+        <div className="flex items-center justify-between mb-5">
           <div>
-            <h3 className="text-sm font-bold text-slate-900 dark:text-white">
-              Group Collection Progress
+            <h3 className="text-base font-bold text-slate-900 dark:text-white">
+              Chit Circle Subscription Performance
             </h3>
-            <p className="text-xs text-slate-500 dark:text-slate-400">
-              Target realization and active subscription performance per circle
+            <p className="text-xs text-[#8E8E93]">
+              Target completion & collection health per active scheme
             </p>
           </div>
           <button
             onClick={() => navigate('/chit-groups')}
-            className="text-xs font-semibold text-indigo-600 dark:text-indigo-400 hover:underline flex items-center gap-1"
+            className="text-xs font-semibold text-[#007AFF] hover:underline flex items-center gap-1"
           >
-            <span>All Groups</span>
-            <ArrowRight className="w-3.5 h-3.5" />
+            <span>View All Groups</span>
+            <ChevronRight className="w-4 h-4" />
           </button>
         </div>
 
@@ -406,73 +410,74 @@ export const DashboardOverview = () => {
             <div
               key={gp.id}
               onClick={() => navigate(`/chit-groups/${gp.id}`)}
-              className="p-3.5 rounded-md bg-slate-50 dark:bg-[#182032] border border-[#e2e4e9] dark:border-[#1e283d] hover:border-slate-400 dark:hover:border-slate-600 transition-colors cursor-pointer"
+              className="p-4 rounded-[16px] bg-[#F2F2F7] dark:bg-[#2C2C2E] border border-black/5 dark:border-white/5 hover:border-[#007AFF]/40 transition-all cursor-pointer shadow-xs active:scale-[0.99]"
             >
               <div className="flex justify-between items-start text-xs">
-                <span className="font-semibold text-slate-900 dark:text-white truncate pr-2">
+                <span className="font-bold text-slate-900 dark:text-white text-sm truncate pr-2">
                   {gp.name}
                 </span>
-                <span className="font-mono text-[10px] text-slate-400">{gp.id}</span>
+                <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-white dark:bg-black/40 text-slate-500">
+                  {gp.id}
+                </span>
               </div>
 
               <div className="mt-3 flex items-baseline justify-between text-xs">
-                <span className="font-bold text-sm text-slate-900 dark:text-white">
+                <span className="font-extrabold text-base text-[#007AFF]">
                   {formatCurrency(gp.collected)}
                 </span>
-                <span className="font-semibold text-indigo-600 dark:text-indigo-400">
+                <span className="font-semibold text-[#34C759]">
                   {gp.percent}% Realized
                 </span>
               </div>
 
-              {/* Progress bar */}
-              <div className="w-full h-1.5 bg-slate-200 dark:bg-slate-700 rounded-full mt-2 overflow-hidden">
+              <div className="w-full h-2 bg-black/10 dark:bg-white/10 rounded-full mt-2 overflow-hidden">
                 <div
-                  className="h-full bg-indigo-600 rounded-full transition-all"
+                  className="h-full bg-gradient-to-r from-[#007AFF] to-[#5856D6] rounded-full transition-all"
                   style={{ width: `${Math.min(gp.percent, 100)}%` }}
                 />
               </div>
 
-              <div className="mt-2.5 flex justify-between text-[11px] text-slate-500 dark:text-slate-400">
+              <div className="mt-3 flex justify-between text-[11px] text-[#8E8E93] font-medium">
                 <span>Value: {formatCurrency(gp.chitValue)}</span>
-                <span>Due: {formatCurrency(gp.pending)}</span>
+                <span>Outstanding: {formatCurrency(gp.pending)}</span>
               </div>
             </div>
           ))}
         </div>
       </div>
 
-      {/* Tier 4: Recent Transactions Table & Upcoming Dues */}
+      {/* Tier 4: Recent Transactions & Upcoming Dues */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Recent Transactions */}
-        <div className="lg:col-span-2 bg-white dark:bg-[#111625] border border-[#e2e4e9] dark:border-[#1e283d] rounded-lg p-5 shadow-xs">
+        {/* Recent Transactions List */}
+        <div className="lg:col-span-2 ios-card p-6">
           <div className="flex items-center justify-between mb-4">
             <div>
-              <h3 className="text-sm font-bold text-slate-900 dark:text-white">
+              <h3 className="text-base font-bold text-slate-900 dark:text-white">
                 Recent Transaction Receipts
               </h3>
-              <p className="text-xs text-slate-500">Live feed of verified member installment receipts</p>
+              <p className="text-xs text-[#8E8E93]">Live verified payment receipts issued</p>
             </div>
             <button
               onClick={() => navigate('/receipts')}
-              className="text-xs font-semibold text-indigo-600 dark:text-indigo-400 hover:underline flex items-center gap-1"
+              className="text-xs font-semibold text-[#007AFF] hover:underline flex items-center gap-1"
             >
-              <span>View All</span>
-              <ArrowRight className="w-3.5 h-3.5" />
+              <span>See All</span>
+              <ChevronRight className="w-4 h-4" />
             </button>
           </div>
 
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs">
-              <thead className="bg-slate-50 dark:bg-slate-800/40 text-slate-500 uppercase tracking-wider border-b border-[#e2e4e9] dark:border-[#1e283d] font-mono text-[10px]">
+              <thead className="bg-[#F2F2F7] dark:bg-[#2C2C2E] text-[#8E8E93] uppercase tracking-wider font-semibold text-[10px] rounded-lg">
                 <tr>
-                  <th className="px-3 py-2.5">Member / Receipt</th>
-                  <th className="px-3 py-2.5">Chit Group</th>
-                  <th className="px-3 py-2.5">Method</th>
-                  <th className="px-3 py-2.5">Amount</th>
-                  <th className="px-3 py-2.5">Status</th>
+                  <th className="px-3.5 py-2.5 rounded-l-lg">Subscriber / Receipt</th>
+                  <th className="px-3.5 py-2.5">Chit Circle</th>
+                  <th className="px-3.5 py-2.5">Channel</th>
+                  <th className="px-3.5 py-2.5">Amount</th>
+                  <th className="px-3.5 py-2.5 rounded-r-lg">Status</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-[#e2e4e9]/70 dark:divide-[#1e283d]">
+              <tbody className="divide-y divide-black/5 dark:divide-white/5 font-medium">
                 {recentTransactions.map((tx) => {
                   const member = members.find((m) => m.id === tx.memberId);
                   const group = groups.find((g) => g.id === tx.groupId);
@@ -481,28 +486,28 @@ export const DashboardOverview = () => {
                     <tr
                       key={tx.id}
                       onClick={() => navigate(`/receipts?receiptNumber=${tx.receiptNumber}`)}
-                      className="hover:bg-slate-50/70 dark:hover:bg-[#182032] cursor-pointer transition-colors"
+                      className="hover:bg-[#F2F2F7]/80 dark:hover:bg-[#2C2C2E]/60 cursor-pointer transition-colors"
                     >
-                      <td className="px-3 py-3">
-                        <div className="font-semibold text-slate-900 dark:text-white">
+                      <td className="px-3.5 py-3">
+                        <div className="font-bold text-slate-900 dark:text-white">
                           {member?.fullName || 'Member'}
                         </div>
-                        <div className="text-[11px] text-slate-400 font-mono">
+                        <div className="text-[11px] text-[#8E8E93] font-mono">
                           {tx.receiptNumber}
                         </div>
                       </td>
-                      <td className="px-3 py-3 text-slate-600 dark:text-slate-300">
+                      <td className="px-3.5 py-3 text-slate-600 dark:text-slate-300">
                         {group?.name || 'Group'}
                       </td>
-                      <td className="px-3 py-3">
-                        <span className="font-mono text-[11px] text-slate-600 dark:text-slate-300">
+                      <td className="px-3.5 py-3">
+                        <span className="px-2 py-0.5 rounded-md bg-black/5 dark:bg-white/10 text-[11px] font-semibold text-slate-700 dark:text-slate-300">
                           {tx.paymentMethod}
                         </span>
                       </td>
-                      <td className="px-3 py-3 font-bold text-slate-900 dark:text-white">
+                      <td className="px-3.5 py-3 font-bold text-slate-900 dark:text-white">
                         {formatCurrency(tx.amount)}
                       </td>
-                      <td className="px-3 py-3">
+                      <td className="px-3.5 py-3">
                         <StatusBadge status={tx.remainingBalance === 0 ? 'PAID' : 'PARTIALLY_PAID'} />
                       </td>
                     </tr>
@@ -514,22 +519,22 @@ export const DashboardOverview = () => {
         </div>
 
         {/* Upcoming Collections Card */}
-        <div className="bg-white dark:bg-[#111625] border border-[#e2e4e9] dark:border-[#1e283d] rounded-lg p-5 shadow-xs flex flex-col justify-between">
+        <div className="ios-card p-6 flex flex-col justify-between">
           <div>
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-sm font-bold text-slate-900 dark:text-white">
+              <h3 className="text-base font-bold text-slate-900 dark:text-white">
                 Upcoming Collections
               </h3>
               <button
                 onClick={() => navigate('/collections')}
-                className="text-xs font-semibold text-indigo-600 dark:text-indigo-400 hover:underline flex items-center gap-1"
+                className="text-xs font-semibold text-[#007AFF] hover:underline flex items-center gap-1"
               >
                 <span>Calendar</span>
-                <ArrowRight className="w-3.5 h-3.5" />
+                <ChevronRight className="w-4 h-4" />
               </button>
             </div>
 
-            <div className="space-y-2.5">
+            <div className="space-y-3">
               {upcomingCollections.map((ins) => {
                 const member = members.find((m) => m.id === ins.memberId);
                 const group = groups.find((g) => g.id === ins.groupId);
@@ -537,13 +542,13 @@ export const DashboardOverview = () => {
                 return (
                   <div
                     key={ins.id}
-                    className="p-3 rounded-md bg-slate-50 dark:bg-[#182032] border border-[#e2e4e9] dark:border-[#1e283d] flex items-center justify-between text-xs"
+                    className="p-3.5 rounded-[14px] bg-[#F2F2F7] dark:bg-[#2C2C2E] flex items-center justify-between text-xs"
                   >
                     <div>
-                      <p className="font-semibold text-slate-900 dark:text-white">
+                      <p className="font-bold text-slate-900 dark:text-white">
                         {member?.fullName}
                       </p>
-                      <p className="text-[11px] text-slate-500 mt-0.5">
+                      <p className="text-[11px] text-[#8E8E93] mt-0.5 font-medium">
                         {group?.name} • Due: {formatDate(ins.dueDate)}
                       </p>
                     </div>
@@ -557,9 +562,9 @@ export const DashboardOverview = () => {
                             `/payments?memberId=${ins.memberId}&installmentId=${ins.id}&groupId=${ins.groupId}`
                           )
                         }
-                        className="text-[11px] text-indigo-600 dark:text-indigo-400 font-semibold hover:underline inline-flex items-center mt-0.5"
+                        className="text-[11px] text-[#007AFF] font-bold hover:underline inline-flex items-center mt-0.5"
                       >
-                        Collect <ArrowUpRight className="w-3 h-3 ml-0.5" />
+                        Collect <ArrowUpRight className="w-3.5 h-3.5 ml-0.5" />
                       </button>
                     </div>
                   </div>
@@ -568,8 +573,8 @@ export const DashboardOverview = () => {
             </div>
           </div>
 
-          <div className="mt-4 pt-3 border-t border-[#e2e4e9] dark:border-[#1e283d] text-[11px] text-slate-400">
-            Realized collections automatically dispatch PDF receipts and update subscriber ledgers.
+          <div className="mt-4 pt-3 border-t border-black/5 dark:border-white/10 text-xs text-[#8E8E93]">
+            Instant computerized receipt generation dispatched upon collection.
           </div>
         </div>
       </div>

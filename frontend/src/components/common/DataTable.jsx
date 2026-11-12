@@ -47,17 +47,17 @@ export const DataTable = ({
   });
 
   return (
-    <div className="bg-white dark:bg-[#111625] border border-[#e2e4e9] dark:border-[#1e283d] rounded-lg overflow-hidden shadow-xs">
+    <div className="ios-card overflow-hidden">
       {/* Search & Filter Toolbar */}
-      <div className="p-3 border-b border-[#e2e4e9] dark:border-[#1e283d] flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2.5">
-        <div className="relative max-w-xs w-full">
-          <Search className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400" />
+      <div className="p-3.5 border-b border-black/5 dark:border-white/10 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 bg-[#F2F2F7]/50 dark:bg-[#1C1C1E]/50">
+        <div className="relative max-w-sm w-full">
+          <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-[#8E8E93]" />
           <input
             type="text"
             value={globalFilter ?? ''}
             onChange={(e) => setGlobalFilter(e.target.value)}
             placeholder={searchPlaceholder}
-            className="w-full pl-8 pr-3 py-1 text-xs bg-slate-50 dark:bg-[#182032] border border-[#e2e4e9] dark:border-[#1e283d] rounded-md focus:outline-hidden focus:ring-1 focus:ring-indigo-500 text-slate-900 dark:text-white placeholder:text-slate-400"
+            className="w-full pl-9 pr-3 py-1.5 text-xs bg-white dark:bg-[#2C2C2E] border-none rounded-full shadow-inner focus:outline-hidden focus:ring-2 focus:ring-[#007AFF] text-slate-900 dark:text-white placeholder:text-[#8E8E93]"
           />
         </div>
 
@@ -68,21 +68,21 @@ export const DataTable = ({
 
       {/* Table Content */}
       <div className="overflow-x-auto">
-        <table className="w-full text-left text-xs text-slate-600 dark:text-slate-300">
-          <thead className="bg-slate-50/70 dark:bg-slate-800/40 text-[10px] font-mono uppercase tracking-wider text-slate-500 dark:text-slate-400 border-b border-[#e2e4e9] dark:border-[#1e283d]">
+        <table className="w-full text-left text-xs text-slate-700 dark:text-slate-300">
+          <thead className="bg-[#F2F2F7] dark:bg-[#2C2C2E] text-[10px] uppercase font-bold tracking-wider text-[#8E8E93] border-b border-black/5 dark:border-white/10">
             {table.getHeaderGroups().map((headerGroup) => (
               <tr key={headerGroup.id}>
                 {headerGroup.headers.map((header) => {
                   return (
                     <th
                       key={header.id}
-                      className="px-3.5 py-2.5 font-semibold select-none"
+                      className="px-4 py-3 select-none"
                     >
                       {header.isPlaceholder ? null : (
                         <div
                           className={
                             header.column.getCanSort()
-                              ? 'flex items-center gap-1 cursor-pointer hover:text-slate-800 dark:hover:text-slate-200'
+                              ? 'flex items-center gap-1.5 cursor-pointer hover:text-slate-900 dark:hover:text-white'
                               : ''
                           }
                           onClick={header.column.getToggleSortingHandler()}
@@ -92,7 +92,7 @@ export const DataTable = ({
                             header.getContext()
                           )}
                           {header.column.getCanSort() && (
-                            <ArrowUpDown className="w-3 h-3 text-slate-400" />
+                            <ArrowUpDown className="w-3 h-3 text-[#8E8E93]" />
                           )}
                         </div>
                       )}
@@ -102,15 +102,15 @@ export const DataTable = ({
               </tr>
             ))}
           </thead>
-          <tbody className="divide-y divide-[#e2e4e9]/70 dark:divide-[#1e283d] font-normal">
+          <tbody className="divide-y divide-black/5 dark:divide-white/5 font-medium">
             {table.getRowModel().rows.length > 0 ? (
               table.getRowModel().rows.map((row) => (
                 <tr
                   key={row.id}
-                  className="hover:bg-slate-50/60 dark:hover:bg-slate-800/40 transition-colors"
+                  className="hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
                 >
                   {row.getVisibleCells().map((cell) => (
-                    <td key={cell.id} className="px-3.5 py-2.5 whitespace-nowrap">
+                    <td key={cell.id} className="px-4 py-3 whitespace-nowrap">
                       {flexRender(cell.column.columnDef.cell, cell.getContext())}
                     </td>
                   ))}
@@ -120,7 +120,7 @@ export const DataTable = ({
               <tr>
                 <td
                   colSpan={columns.length}
-                  className="px-4 py-8 text-center text-slate-400 text-xs"
+                  className="px-4 py-8 text-center text-[#8E8E93] text-xs font-medium"
                 >
                   No matching records found.
                 </td>
@@ -131,21 +131,21 @@ export const DataTable = ({
       </div>
 
       {/* Pagination Footer */}
-      <div className="p-3 border-t border-[#e2e4e9] dark:border-[#1e283d] flex items-center justify-between text-xs text-slate-500 dark:text-slate-400">
-        <div className="font-mono text-[11px]">
+      <div className="p-3.5 border-t border-black/5 dark:border-white/10 flex items-center justify-between text-xs text-[#8E8E93]">
+        <div className="font-medium">
           Showing{' '}
-          <span className="font-semibold text-slate-800 dark:text-slate-200">
+          <span className="font-bold text-slate-800 dark:text-slate-200">
             {table.getState().pagination.pageIndex * table.getState().pagination.pageSize + 1}
           </span>{' '}
           to{' '}
-          <span className="font-semibold text-slate-800 dark:text-slate-200">
+          <span className="font-bold text-slate-800 dark:text-slate-200">
             {Math.min(
               (table.getState().pagination.pageIndex + 1) * table.getState().pagination.pageSize,
               table.getFilteredRowModel().rows.length
             )}
           </span>{' '}
           of{' '}
-          <span className="font-semibold text-slate-800 dark:text-slate-200">
+          <span className="font-bold text-slate-800 dark:text-slate-200">
             {table.getFilteredRowModel().rows.length}
           </span>{' '}
           records
@@ -155,31 +155,31 @@ export const DataTable = ({
           <button
             onClick={() => table.setPageIndex(0)}
             disabled={!table.getCanPreviousPage()}
-            className="p-1 rounded hover:bg-slate-100 dark:hover:bg-slate-800 disabled:opacity-30 disabled:cursor-not-allowed"
+            className="p-1.5 rounded-full hover:bg-black/5 dark:hover:bg-white/10 disabled:opacity-30 disabled:cursor-not-allowed"
           >
             <ChevronsLeft className="w-3.5 h-3.5" />
           </button>
           <button
             onClick={() => table.previousPage()}
             disabled={!table.getCanPreviousPage()}
-            className="p-1 rounded hover:bg-slate-100 dark:hover:bg-slate-800 disabled:opacity-30 disabled:cursor-not-allowed"
+            className="p-1.5 rounded-full hover:bg-black/5 dark:hover:bg-white/10 disabled:opacity-30 disabled:cursor-not-allowed"
           >
             <ChevronLeft className="w-3.5 h-3.5" />
           </button>
-          <span className="px-2 font-mono text-[11px]">
+          <span className="px-2 font-bold text-slate-800 dark:text-slate-200">
             {table.getState().pagination.pageIndex + 1} / {table.getPageCount() || 1}
           </span>
           <button
             onClick={() => table.nextPage()}
             disabled={!table.getCanNextPage()}
-            className="p-1 rounded hover:bg-slate-100 dark:hover:bg-slate-800 disabled:opacity-30 disabled:cursor-not-allowed"
+            className="p-1.5 rounded-full hover:bg-black/5 dark:hover:bg-white/10 disabled:opacity-30 disabled:cursor-not-allowed"
           >
             <ChevronRight className="w-3.5 h-3.5" />
           </button>
           <button
             onClick={() => table.setPageIndex(table.getPageCount() - 1)}
             disabled={!table.getCanNextPage()}
-            className="p-1 rounded hover:bg-slate-100 dark:hover:bg-slate-800 disabled:opacity-30 disabled:cursor-not-allowed"
+            className="p-1.5 rounded-full hover:bg-black/5 dark:hover:bg-white/10 disabled:opacity-30 disabled:cursor-not-allowed"
           >
             <ChevronsRight className="w-3.5 h-3.5" />
           </button>
