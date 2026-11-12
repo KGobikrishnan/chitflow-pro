@@ -43,7 +43,7 @@ export const CreateGroupModal = ({ isOpen, onClose }) => {
   const onSubmit = (data) => {
     try {
       const created = addGroup(data);
-      toast.success(`Chit Group "${created.name}" created successfully!`);
+      toast.success(`Chit Group "${created.name}" established successfully!`);
       reset();
       onClose();
     } catch (err) {
@@ -52,19 +52,19 @@ export const CreateGroupModal = ({ isOpen, onClose }) => {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-xs overflow-y-auto">
-      <div className="bg-white dark:bg-slate-900 rounded-xl max-w-xl w-full p-6 shadow-2xl border border-slate-200 dark:border-slate-800 my-8">
-        <div className="flex items-center justify-between pb-4 border-b border-slate-100 dark:border-slate-800">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-xs overflow-y-auto">
+      <div className="bg-white dark:bg-[#111625] rounded-lg max-w-xl w-full p-6 shadow-2xl border border-[#e2e4e9] dark:border-[#1e283d] my-8 animate-in fade-in zoom-in-95">
+        <div className="flex items-center justify-between pb-3 border-b border-[#e2e4e9] dark:border-[#1e283d]">
           <div>
-            <h3 className="text-lg font-bold text-slate-900 dark:text-white">
+            <h3 className="text-base font-bold text-slate-900 dark:text-white">
               Create New Chit Group
             </h3>
             <p className="text-xs text-slate-500">
-              Establish a new chit fund circle with auto-calculated installment values
+              Configure group tenure, installment run-rate, and statutory rules
             </p>
           </div>
-          <button onClick={onClose} className="text-slate-400 hover:text-slate-600">
-            <X className="w-5 h-5" />
+          <button onClick={onClose} className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">
+            <X className="w-4 h-4" />
           </button>
         </div>
 
@@ -75,9 +75,9 @@ export const CreateGroupModal = ({ isOpen, onClose }) => {
             </label>
             <input
               type="text"
-              placeholder="e.g. Pongal Prosperity Chit 2027"
+              placeholder="e.g. Coimbatore Traders Circle 2027"
               {...register('name')}
-              className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white"
+              className="w-full px-3 py-1.5 bg-slate-50 dark:bg-[#182032] border border-[#e2e4e9] dark:border-[#1e283d] rounded-md text-slate-900 dark:text-white"
             />
             {errors.name && <p className="text-rose-500 mt-1">{errors.name.message}</p>}
           </div>
@@ -85,12 +85,12 @@ export const CreateGroupModal = ({ isOpen, onClose }) => {
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">
-                Total Chit Value (INR) *
+                Total Chit Pool Value (INR) *
               </label>
               <input
                 type="number"
                 {...register('chitValue')}
-                className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white"
+                className="w-full px-3 py-1.5 bg-slate-50 dark:bg-[#182032] border border-[#e2e4e9] dark:border-[#1e283d] rounded-md text-slate-900 dark:text-white font-mono"
               />
               {errors.chitValue && <p className="text-rose-500 mt-1">{errors.chitValue.message}</p>}
             </div>
@@ -102,23 +102,23 @@ export const CreateGroupModal = ({ isOpen, onClose }) => {
               <input
                 type="number"
                 {...register('durationMonths')}
-                className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white"
+                className="w-full px-3 py-1.5 bg-slate-50 dark:bg-[#182032] border border-[#e2e4e9] dark:border-[#1e283d] rounded-md text-slate-900 dark:text-white"
               />
               {errors.durationMonths && <p className="text-rose-500 mt-1">{errors.durationMonths.message}</p>}
             </div>
           </div>
 
           {/* Auto Calculation Preview Banner */}
-          <div className="p-3 bg-indigo-50 dark:bg-indigo-950/40 rounded-lg border border-indigo-100 dark:border-indigo-900 flex justify-between items-center text-xs">
+          <div className="p-3 bg-indigo-50/60 dark:bg-indigo-950/30 rounded-md border border-indigo-100 dark:border-indigo-900/50 flex justify-between items-center text-xs">
             <div>
-              <span className="text-slate-500 dark:text-slate-400">Calculated Monthly Target:</span>
-              <p className="text-base font-bold text-indigo-700 dark:text-indigo-400">
-                ₹{calculatedMonthly.toLocaleString('en-IN')} / member
+              <span className="text-slate-500 dark:text-slate-400">Monthly Contribution Target:</span>
+              <p className="text-sm font-bold text-indigo-700 dark:text-indigo-400 mt-0.5">
+                ₹{calculatedMonthly.toLocaleString('en-IN')} / subscriber
               </p>
             </div>
             <div className="text-right">
-              <span className="text-slate-500 dark:text-slate-400">Estimated End Date:</span>
-              <p className="font-semibold text-slate-800 dark:text-slate-200">
+              <span className="text-slate-500 dark:text-slate-400">Scheduled End Date:</span>
+              <p className="font-semibold text-slate-800 dark:text-slate-200 mt-0.5 font-mono">
                 {calculatedEndDate || 'N/A'}
               </p>
             </div>
@@ -127,12 +127,12 @@ export const CreateGroupModal = ({ isOpen, onClose }) => {
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">
-                Target Member Count *
+                Target Capacity (Subscribers) *
               </label>
               <input
                 type="number"
                 {...register('memberCount')}
-                className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white"
+                className="w-full px-3 py-1.5 bg-slate-50 dark:bg-[#182032] border border-[#e2e4e9] dark:border-[#1e283d] rounded-md text-slate-900 dark:text-white"
               />
               {errors.memberCount && <p className="text-rose-500 mt-1">{errors.memberCount.message}</p>}
             </div>
@@ -144,7 +144,7 @@ export const CreateGroupModal = ({ isOpen, onClose }) => {
               <input
                 type="date"
                 {...register('startDate')}
-                className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white"
+                className="w-full px-3 py-1.5 bg-slate-50 dark:bg-[#182032] border border-[#e2e4e9] dark:border-[#1e283d] rounded-md text-slate-900 dark:text-white"
               />
               {errors.startDate && <p className="text-rose-500 mt-1">{errors.startDate.message}</p>}
             </div>
@@ -153,16 +153,15 @@ export const CreateGroupModal = ({ isOpen, onClose }) => {
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">
-                Monthly Due Day (Day of Month)
+                Monthly Due Day (1-31)
               </label>
               <input
                 type="number"
                 min="1"
                 max="31"
                 {...register('collectionDueDate')}
-                className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white"
+                className="w-full px-3 py-1.5 bg-slate-50 dark:bg-[#182032] border border-[#e2e4e9] dark:border-[#1e283d] rounded-md text-slate-900 dark:text-white"
               />
-              {errors.collectionDueDate && <p className="text-rose-500 mt-1">{errors.collectionDueDate.message}</p>}
             </div>
 
             <div>
@@ -173,9 +172,8 @@ export const CreateGroupModal = ({ isOpen, onClose }) => {
                 type="number"
                 min="0"
                 {...register('gracePeriodDays')}
-                className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white"
+                className="w-full px-3 py-1.5 bg-slate-50 dark:bg-[#182032] border border-[#e2e4e9] dark:border-[#1e283d] rounded-md text-slate-900 dark:text-white"
               />
-              {errors.gracePeriodDays && <p className="text-rose-500 mt-1">{errors.gracePeriodDays.message}</p>}
             </div>
           </div>
 
@@ -185,26 +183,26 @@ export const CreateGroupModal = ({ isOpen, onClose }) => {
             </label>
             <textarea
               rows="2"
-              placeholder="Provide background, target demographic, or specific auction terms..."
+              placeholder="Background, target subscriber segment, or specific auction terms..."
               {...register('description')}
-              className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white"
+              className="w-full px-3 py-1.5 bg-slate-50 dark:bg-[#182032] border border-[#e2e4e9] dark:border-[#1e283d] rounded-md text-slate-900 dark:text-white"
             />
           </div>
 
-          <div className="pt-4 border-t border-slate-100 dark:border-slate-800 flex justify-end gap-3">
+          <div className="pt-3 border-t border-[#e2e4e9] dark:border-[#1e283d] flex justify-end gap-2.5">
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 text-xs font-semibold text-slate-600 bg-slate-100 dark:bg-slate-800 dark:text-slate-300 rounded-lg hover:bg-slate-200"
+              className="px-3.5 py-1.5 text-xs font-medium text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 rounded-md hover:bg-slate-200"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={isSubmitting}
-              className="px-4 py-2 text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg shadow-xs"
+              className="px-4 py-1.5 text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-700 rounded-md shadow-xs"
             >
-              {isSubmitting ? 'Creating...' : 'Establish Group'}
+              {isSubmitting ? 'Establishing...' : 'Establish Group'}
             </button>
           </div>
         </form>
@@ -212,4 +210,3 @@ export const CreateGroupModal = ({ isOpen, onClose }) => {
     </div>
   );
 };
-

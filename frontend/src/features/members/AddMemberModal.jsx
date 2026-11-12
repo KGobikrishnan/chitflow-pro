@@ -38,7 +38,7 @@ export const AddMemberModal = ({ isOpen, onClose }) => {
   const onSubmit = (data) => {
     try {
       const created = addMember(data);
-      toast.success(`Member "${created.fullName}" onboarded successfully!`);
+      toast.success(`Subscriber "${created.fullName}" onboarded successfully!`);
       reset();
       onClose();
     } catch (err) {
@@ -47,19 +47,19 @@ export const AddMemberModal = ({ isOpen, onClose }) => {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-xs overflow-y-auto">
-      <div className="bg-white dark:bg-slate-900 rounded-xl max-w-2xl w-full p-6 shadow-2xl border border-slate-200 dark:border-slate-800 my-8">
-        <div className="flex items-center justify-between pb-4 border-b border-slate-100 dark:border-slate-800">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-xs overflow-y-auto">
+      <div className="bg-white dark:bg-[#111625] rounded-lg max-w-2xl w-full p-6 shadow-2xl border border-[#e2e4e9] dark:border-[#1e283d] my-8 animate-in fade-in zoom-in-95">
+        <div className="flex items-center justify-between pb-3 border-b border-[#e2e4e9] dark:border-[#1e283d]">
           <div>
-            <h3 className="text-lg font-bold text-slate-900 dark:text-white">
-              Enroll New Member
+            <h3 className="text-base font-bold text-slate-900 dark:text-white">
+              Enroll New Chit Subscriber
             </h3>
             <p className="text-xs text-slate-500">
-              Register personal details, nominee nomination, and group assignments
+              KYC credentials, nominee designation, and circle assignment
             </p>
           </div>
-          <button onClick={onClose} className="text-slate-400 hover:text-slate-600">
-            <X className="w-5 h-5" />
+          <button onClick={onClose} className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">
+            <X className="w-4 h-4" />
           </button>
         </div>
 
@@ -71,22 +71,22 @@ export const AddMemberModal = ({ isOpen, onClose }) => {
               </label>
               <input
                 type="text"
-                placeholder="e.g. Ramesh Kumar"
+                placeholder="e.g. Balasubramaniam K"
                 {...register('fullName')}
-                className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white"
+                className="w-full px-3 py-1.5 bg-slate-50 dark:bg-[#182032] border border-[#e2e4e9] dark:border-[#1e283d] rounded-md text-slate-900 dark:text-white"
               />
               {errors.fullName && <p className="text-rose-500 mt-1">{errors.fullName.message}</p>}
             </div>
 
             <div>
               <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">
-                Mobile Number (10 digits) *
+                Indian Mobile Number (10 digits) *
               </label>
               <input
                 type="text"
                 placeholder="e.g. 9842100001"
                 {...register('mobileNumber')}
-                className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white"
+                className="w-full px-3 py-1.5 bg-slate-50 dark:bg-[#182032] border border-[#e2e4e9] dark:border-[#1e283d] rounded-md text-slate-900 dark:text-white font-mono"
               />
               {errors.mobileNumber && (
                 <p className="text-rose-500 mt-1">{errors.mobileNumber.message}</p>
@@ -101,9 +101,9 @@ export const AddMemberModal = ({ isOpen, onClose }) => {
               </label>
               <input
                 type="email"
-                placeholder="e.g. ramesh@example.com"
+                placeholder="e.g. bala@example.com"
                 {...register('email')}
-                className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white"
+                className="w-full px-3 py-1.5 bg-slate-50 dark:bg-[#182032] border border-[#e2e4e9] dark:border-[#1e283d] rounded-md text-slate-900 dark:text-white"
               />
               {errors.email && <p className="text-rose-500 mt-1">{errors.email.message}</p>}
             </div>
@@ -116,7 +116,7 @@ export const AddMemberModal = ({ isOpen, onClose }) => {
                 type="text"
                 placeholder="e.g. Coimbatore"
                 {...register('city')}
-                className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white"
+                className="w-full px-3 py-1.5 bg-slate-50 dark:bg-[#182032] border border-[#e2e4e9] dark:border-[#1e283d] rounded-md text-slate-900 dark:text-white"
               />
               {errors.city && <p className="text-rose-500 mt-1">{errors.city.message}</p>}
             </div>
@@ -128,15 +128,15 @@ export const AddMemberModal = ({ isOpen, onClose }) => {
             </label>
             <textarea
               rows="2"
-              placeholder="e.g. 42, Cross Cut Road, Gandhipuram"
+              placeholder="e.g. 14, Kumaran Road, Tirupur"
               {...register('address')}
-              className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white"
+              className="w-full px-3 py-1.5 bg-slate-50 dark:bg-[#182032] border border-[#e2e4e9] dark:border-[#1e283d] rounded-md text-slate-900 dark:text-white"
             />
             {errors.address && <p className="text-rose-500 mt-1">{errors.address.message}</p>}
           </div>
 
-          <div className="p-3 bg-slate-50 dark:bg-slate-800/60 rounded-lg border border-slate-200 dark:border-slate-700">
-            <span className="font-bold text-slate-800 dark:text-slate-200 block mb-2">
+          <div className="p-3 bg-slate-50 dark:bg-[#182032] rounded-md border border-[#e2e4e9] dark:border-[#1e283d]">
+            <span className="font-semibold text-slate-800 dark:text-slate-200 block mb-2">
               Assign to Chit Circle (Optional)
             </span>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
@@ -158,18 +158,20 @@ export const AddMemberModal = ({ isOpen, onClose }) => {
           </div>
 
           {/* Nominee details */}
-          <div className="border-t border-slate-100 dark:border-slate-800 pt-3">
-            <h4 className="font-bold text-slate-800 dark:text-slate-200 mb-2">Nominee Details</h4>
+          <div className="border-t border-[#e2e4e9] dark:border-[#1e283d] pt-3">
+            <h4 className="font-semibold text-slate-800 dark:text-slate-200 mb-2">
+              Statutory Nominee Details
+            </h4>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               <div>
                 <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">
-                  Nominee Name *
+                  Nominee Full Name *
                 </label>
                 <input
                   type="text"
-                  placeholder="e.g. Priya Ramesh"
+                  placeholder="e.g. Radha B"
                   {...register('nomineeName')}
-                  className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white"
+                  className="w-full px-3 py-1.5 bg-slate-50 dark:bg-[#182032] border border-[#e2e4e9] dark:border-[#1e283d] rounded-md text-slate-900 dark:text-white"
                 />
                 {errors.nomineeName && (
                   <p className="text-rose-500 mt-1">{errors.nomineeName.message}</p>
@@ -182,9 +184,9 @@ export const AddMemberModal = ({ isOpen, onClose }) => {
                 </label>
                 <input
                   type="text"
-                  placeholder="e.g. Spouse / Mother"
+                  placeholder="e.g. Spouse / Brother"
                   {...register('nomineeRelationship')}
-                  className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white"
+                  className="w-full px-3 py-1.5 bg-slate-50 dark:bg-[#182032] border border-[#e2e4e9] dark:border-[#1e283d] rounded-md text-slate-900 dark:text-white"
                 />
                 {errors.nomineeRelationship && (
                   <p className="text-rose-500 mt-1">{errors.nomineeRelationship.message}</p>
@@ -199,7 +201,7 @@ export const AddMemberModal = ({ isOpen, onClose }) => {
                   type="text"
                   placeholder="e.g. 9842100099"
                   {...register('nomineeMobile')}
-                  className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white"
+                  className="w-full px-3 py-1.5 bg-slate-50 dark:bg-[#182032] border border-[#e2e4e9] dark:border-[#1e283d] rounded-md text-slate-900 dark:text-white font-mono"
                 />
                 {errors.nomineeMobile && (
                   <p className="text-rose-500 mt-1">{errors.nomineeMobile.message}</p>
@@ -208,20 +210,20 @@ export const AddMemberModal = ({ isOpen, onClose }) => {
             </div>
           </div>
 
-          <div className="pt-4 border-t border-slate-100 dark:border-slate-800 flex justify-end gap-3">
+          <div className="pt-3 border-t border-[#e2e4e9] dark:border-[#1e283d] flex justify-end gap-2.5">
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 text-xs font-semibold text-slate-600 bg-slate-100 dark:bg-slate-800 dark:text-slate-300 rounded-lg hover:bg-slate-200"
+              className="px-3.5 py-1.5 text-xs font-medium text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 rounded-md hover:bg-slate-200"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={isSubmitting}
-              className="px-4 py-2 text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg shadow-xs"
+              className="px-4 py-1.5 text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-700 rounded-md shadow-xs"
             >
-              {isSubmitting ? 'Onboarding...' : 'Register Member'}
+              {isSubmitting ? 'Onboarding...' : 'Onboard Member'}
             </button>
           </div>
         </form>
@@ -229,4 +231,3 @@ export const AddMemberModal = ({ isOpen, onClose }) => {
     </div>
   );
 };
-

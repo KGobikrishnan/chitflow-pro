@@ -24,7 +24,6 @@ import { useAppStore } from '../../store/useAppStore';
 import { formatCurrency } from '../../utils/currency';
 import { formatDate } from '../../utils/date';
 import { exportToCSV } from '../../utils/export';
-import { PageHeader } from '../../components/common/PageHeader';
 import { StatusBadge } from '../../components/common/StatusBadge';
 
 export const ReportsDashboard = () => {
@@ -34,8 +33,7 @@ export const ReportsDashboard = () => {
   const transactions = useAppStore((state) => state.transactions);
   const payouts = useAppStore((state) => state.payouts);
 
-  const [activeReportTab, setActiveReportTab] = useState('daily'); // daily, monthly, overdue, groupwise, mode
-  const [selectedGroup, setSelectedGroup] = useState('ALL');
+  const [activeReportTab, setActiveReportTab] = useState('groupwise');
 
   // Breakdown by payment method
   const methodBreakdown = transactions.reduce((acc, tx) => {
@@ -105,35 +103,40 @@ export const ReportsDashboard = () => {
 
   return (
     <div className="space-y-6">
-      <PageHeader
-        title="Reports & Analytics"
-        subtitle="Audited financial summaries, overdue collections, group-wise ledger and payment channel breakdown"
-        breadcrumbs={['ChitFlow', 'Reports']}
-        action={
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => window.print()}
-              className="px-3.5 py-2 text-xs font-semibold text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 rounded-lg shadow-xs flex items-center gap-1.5"
-            >
-              <Printer className="w-3.5 h-3.5" />
-              <span>Print Audit Sheet</span>
-            </button>
-          </div>
-        }
-      />
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-4 border-b border-[#e2e4e9] dark:border-[#1e283d]">
+        <div>
+          <h1 className="text-xl font-bold tracking-tight text-slate-900 dark:text-white">
+            Audit Reports & Analytics
+          </h1>
+          <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+            Statutory Chit Funds Act financial reconciliations, defaults ledger and payment channel breakdown.
+          </p>
+        </div>
 
-      {/* Report Tab Selector */}
-      <div className="border-b border-slate-200 dark:border-slate-800">
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => window.print()}
+            className="px-3 py-1.5 text-xs font-medium text-slate-700 dark:text-slate-300 bg-white dark:bg-[#111625] border border-[#e2e4e9] dark:border-[#1e283d] rounded-md hover:bg-slate-50 flex items-center gap-1.5"
+          >
+            <Printer className="w-3.5 h-3.5 text-slate-400" />
+            <span>Print Audit Sheet</span>
+          </button>
+        </div>
+      </div>
+
+      {/* Tabs */}
+      <div className="border-b border-[#e2e4e9] dark:border-[#1e283d]">
         <nav className="flex space-x-6 text-xs font-semibold">
           {[
-            { id: 'groupwise', label: 'Group-wise Financial Report' },
+            { id: 'groupwise', label: 'Group-wise Financial Audit' },
             { id: 'overdue', label: `Overdue Dues Ledger (${overdueRecords.length})` },
-            { id: 'mode', label: 'Payment Channel Audit' },
+            { id: 'mode', label: 'Payment Channel Breakdown' },
           ].map((tab) => (
             <button
               key={tab.id}
               onClick={() => setActiveReportTab(tab.id)}
-              className={`pb-3 border-b-2 transition-all ${
+              className={`pb-2.5 border-b-2 font-medium transition-all ${
                 activeReportTab === tab.id
                   ? 'border-indigo-600 text-indigo-600 dark:text-indigo-400 font-bold'
                   : 'border-transparent text-slate-500 hover:text-slate-800 dark:hover:text-slate-300'
@@ -145,10 +148,10 @@ export const ReportsDashboard = () => {
         </nav>
       </div>
 
-      {/* Groupwise Report Panel */}
+      {/* Tab 1: Groupwise */}
       {activeReportTab === 'groupwise' && (
         <div className="space-y-6">
-          <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200/80 dark:border-slate-800 p-5 shadow-xs">
+          <div className="bg-white dark:bg-[#111625] rounded-lg border border-[#e2e4e9] dark:border-[#1e283d] p-5 shadow-xs">
             <div className="flex justify-between items-center mb-4">
               <h3 className="font-bold text-sm text-slate-900 dark:text-white">
                 Chit Circle Target vs Realized Collection Comparison
@@ -165,46 +168,46 @@ export const ReportsDashboard = () => {
             <div className="h-64 w-full">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={groupwiseSummary}>
-                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                  <XAxis dataKey="name" tick={{ fontSize: 11, fill: '#94a3b8' }} />
+                  <CartesianGrid strokeDasharray="2 2" vertical={false} stroke="#e2e4e9" strokeOpacity={0.6} />
+                  <XAxis dataKey="name" tick={{ fontSize: 11, fill: '#868c98' }} />
                   <YAxis
                     tickFormatter={(v) => `₹${v / 1000}k`}
-                    tick={{ fontSize: 11, fill: '#94a3b8' }}
+                    tick={{ fontSize: 11, fill: '#868c98' }}
                   />
                   <Tooltip formatter={(v) => formatCurrency(v)} />
                   <Legend />
-                  <Bar dataKey="collected" name="Realized Collection" fill="#4338ca" radius={[4, 4, 0, 0]} />
-                  <Bar dataKey="pending" name="Pending Balance" fill="#f59e0b" radius={[4, 4, 0, 0]} />
+                  <Bar dataKey="collected" name="Realized Collection" fill="#4338ca" radius={[3, 3, 0, 0]} />
+                  <Bar dataKey="pending" name="Pending Balance" fill="#f59e0b" radius={[3, 3, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
             </div>
           </div>
 
-          <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200/80 dark:border-slate-800 overflow-hidden shadow-xs">
+          <div className="bg-white dark:bg-[#111625] rounded-lg border border-[#e2e4e9] dark:border-[#1e283d] overflow-hidden shadow-xs">
             <table className="w-full text-left text-xs">
-              <thead className="bg-slate-50 dark:bg-slate-800/40 text-slate-500 uppercase tracking-wider border-b border-slate-200 dark:border-slate-800">
+              <thead className="bg-slate-50 dark:bg-slate-800/40 text-slate-500 uppercase tracking-wider border-b border-[#e2e4e9] dark:border-[#1e283d] font-mono text-[10px]">
                 <tr>
-                  <th className="px-4 py-3">Group ID & Name</th>
-                  <th className="px-4 py-3">Face Value</th>
-                  <th className="px-4 py-3">Target Obligation</th>
-                  <th className="px-4 py-3">Total Collected</th>
-                  <th className="px-4 py-3">Pending Dues</th>
-                  <th className="px-4 py-3">Efficiency</th>
+                  <th className="px-4 py-2.5">Circle ID & Name</th>
+                  <th className="px-4 py-2.5">Chit Pool Value</th>
+                  <th className="px-4 py-2.5">Target Obligation</th>
+                  <th className="px-4 py-2.5">Total Realized</th>
+                  <th className="px-4 py-2.5">Outstanding</th>
+                  <th className="px-4 py-2.5">Efficiency</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+              <tbody className="divide-y divide-[#e2e4e9]/70 dark:divide-[#1e283d]">
                 {groupwiseSummary.map((g) => (
                   <tr key={g.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/30">
-                    <td className="px-4 py-3">
-                      <div className="font-bold text-slate-900 dark:text-white">{g.name}</div>
+                    <td className="px-4 py-2.5">
+                      <div className="font-semibold text-slate-900 dark:text-white">{g.name}</div>
                       <div className="text-[11px] text-slate-400 font-mono">{g.id}</div>
                     </td>
-                    <td className="px-4 py-3 font-semibold">{formatCurrency(g.chitValue)}</td>
-                    <td className="px-4 py-3">{formatCurrency(g.expected)}</td>
-                    <td className="px-4 py-3 font-bold text-emerald-600">{formatCurrency(g.collected)}</td>
-                    <td className="px-4 py-3 font-bold text-amber-600">{formatCurrency(g.pending)}</td>
-                    <td className="px-4 py-3">
-                      <span className="font-bold text-indigo-600 dark:text-indigo-400">{g.efficiency}%</span>
+                    <td className="px-4 py-2.5 font-mono">{formatCurrency(g.chitValue)}</td>
+                    <td className="px-4 py-2.5 font-mono">{formatCurrency(g.expected)}</td>
+                    <td className="px-4 py-2.5 font-bold text-emerald-600 font-mono">{formatCurrency(g.collected)}</td>
+                    <td className="px-4 py-2.5 font-bold text-amber-600 font-mono">{formatCurrency(g.pending)}</td>
+                    <td className="px-4 py-2.5">
+                      <span className="font-bold text-indigo-600 dark:text-indigo-400 font-mono">{g.efficiency}%</span>
                     </td>
                   </tr>
                 ))}
@@ -214,55 +217,55 @@ export const ReportsDashboard = () => {
         </div>
       )}
 
-      {/* Overdue Report Panel */}
+      {/* Tab 2: Overdue */}
       {activeReportTab === 'overdue' && (
         <div className="space-y-6">
           <div className="flex justify-between items-center">
             <div>
-              <h3 className="font-bold text-base text-slate-900 dark:text-white">
-                Delayed & Default Installments Ledger
+              <h3 className="font-bold text-sm text-slate-900 dark:text-white">
+                Delayed Dues & Defaults Ledger
               </h3>
               <p className="text-xs text-slate-500">
-                Installment records exceeding due date + grace period
+                Installment schedules past due date and statutory grace period
               </p>
             </div>
             <button
               onClick={handleExportOverdue}
-              className="px-3.5 py-2 text-xs font-semibold text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 rounded-lg flex items-center gap-1.5"
+              className="px-3 py-1.5 text-xs font-medium text-slate-700 dark:text-slate-300 bg-white dark:bg-[#111625] border border-[#e2e4e9] dark:border-[#1e283d] rounded-md hover:bg-slate-50 flex items-center gap-1.5"
             >
-              <Download className="w-3.5 h-3.5" />
+              <Download className="w-3.5 h-3.5 text-slate-400" />
               <span>Export Overdue CSV</span>
             </button>
           </div>
 
-          <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200/80 dark:border-slate-800 overflow-hidden shadow-xs">
+          <div className="bg-white dark:bg-[#111625] rounded-lg border border-[#e2e4e9] dark:border-[#1e283d] overflow-hidden shadow-xs">
             <table className="w-full text-left text-xs">
-              <thead className="bg-slate-50 dark:bg-slate-800/40 text-slate-500 uppercase tracking-wider border-b border-slate-200 dark:border-slate-800">
+              <thead className="bg-slate-50 dark:bg-slate-800/40 text-slate-500 uppercase tracking-wider border-b border-[#e2e4e9] dark:border-[#1e283d] font-mono text-[10px]">
                 <tr>
-                  <th className="px-4 py-3">Member Details</th>
-                  <th className="px-4 py-3">Chit Group</th>
-                  <th className="px-4 py-3">Installment Cycle</th>
-                  <th className="px-4 py-3">Scheduled Due Date</th>
-                  <th className="px-4 py-3">Expected Amount</th>
-                  <th className="px-4 py-3">Paid Amount</th>
-                  <th className="px-4 py-3">Unpaid Balance</th>
-                  <th className="px-4 py-3">Status</th>
+                  <th className="px-4 py-2.5">Subscriber</th>
+                  <th className="px-4 py-2.5">Chit Group</th>
+                  <th className="px-4 py-2.5">Cycle #</th>
+                  <th className="px-4 py-2.5">Scheduled Due</th>
+                  <th className="px-4 py-2.5">Expected Due</th>
+                  <th className="px-4 py-2.5">Paid</th>
+                  <th className="px-4 py-2.5">Overdue Balance</th>
+                  <th className="px-4 py-2.5">Status</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+              <tbody className="divide-y divide-[#e2e4e9]/70 dark:divide-[#1e283d]">
                 {overdueRecords.map((r) => (
                   <tr key={r.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/30">
-                    <td className="px-4 py-3">
+                    <td className="px-4 py-2.5">
                       <div className="font-semibold text-slate-900 dark:text-white">{r.memberName}</div>
-                      <div className="text-[11px] text-slate-400">{r.mobileNumber}</div>
+                      <div className="text-[11px] text-slate-400 font-mono">{r.mobileNumber}</div>
                     </td>
-                    <td className="px-4 py-3 text-slate-700 dark:text-slate-300">{r.groupName}</td>
-                    <td className="px-4 py-3 font-semibold">Month #{r.installmentNumber}</td>
-                    <td className="px-4 py-3 text-slate-500">{formatDate(r.dueDate)}</td>
-                    <td className="px-4 py-3">{formatCurrency(r.expectedAmount)}</td>
-                    <td className="px-4 py-3 font-medium text-emerald-600">{formatCurrency(r.paidAmount)}</td>
-                    <td className="px-4 py-3 font-bold text-rose-600">{formatCurrency(r.remainingAmount)}</td>
-                    <td className="px-4 py-3">
+                    <td className="px-4 py-2.5 text-slate-600 dark:text-slate-300">{r.groupName}</td>
+                    <td className="px-4 py-2.5 font-medium">Month #{r.installmentNumber}</td>
+                    <td className="px-4 py-2.5 text-slate-500 font-mono">{formatDate(r.dueDate)}</td>
+                    <td className="px-4 py-2.5 font-mono">{formatCurrency(r.expectedAmount)}</td>
+                    <td className="px-4 py-2.5 font-mono text-emerald-600">{formatCurrency(r.paidAmount)}</td>
+                    <td className="px-4 py-2.5 font-bold text-rose-600 font-mono">{formatCurrency(r.remainingAmount)}</td>
+                    <td className="px-4 py-2.5">
                       <StatusBadge status="OVERDUE" />
                     </td>
                   </tr>
@@ -273,16 +276,16 @@ export const ReportsDashboard = () => {
         </div>
       )}
 
-      {/* Payment Channel Audit */}
+      {/* Tab 3: Mode */}
       {activeReportTab === 'mode' && (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 text-xs">
           {Object.values(methodBreakdown).map((m) => (
             <div
               key={m.method}
-              className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200/80 dark:border-slate-800 p-5 shadow-xs"
+              className="bg-white dark:bg-[#111625] rounded-lg border border-[#e2e4e9] dark:border-[#1e283d] p-5 shadow-xs"
             >
-              <span className="text-[11px] font-semibold text-slate-400 uppercase">{m.method} Collections</span>
-              <p className="text-xl font-bold text-slate-900 dark:text-white mt-1">
+              <span className="text-[10px] font-mono text-slate-400 uppercase">{m.method} Channel</span>
+              <p className="text-xl font-bold text-slate-900 dark:text-white mt-1 font-mono">
                 {formatCurrency(m.total)}
               </p>
               <p className="text-[11px] text-slate-500 mt-0.5">{m.count} successful transactions</p>
@@ -293,4 +296,3 @@ export const ReportsDashboard = () => {
     </div>
   );
 };
-

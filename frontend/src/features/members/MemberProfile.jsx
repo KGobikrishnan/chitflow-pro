@@ -18,7 +18,6 @@ import {
 import { useAppStore } from '../../store/useAppStore';
 import { formatCurrency } from '../../utils/currency';
 import { formatDate } from '../../utils/date';
-import { PageHeader } from '../../components/common/PageHeader';
 import { StatusBadge } from '../../components/common/StatusBadge';
 import { exportToCSV } from '../../utils/export';
 
@@ -38,12 +37,12 @@ export const MemberProfile = () => {
   if (!member) {
     return (
       <div className="p-8 text-center">
-        <h2 className="text-xl font-bold">Member Not Found</h2>
+        <h2 className="text-base font-bold">Subscriber Not Found</h2>
         <button
           onClick={() => navigate('/members')}
-          className="mt-4 px-4 py-2 text-xs font-semibold text-white bg-indigo-600 rounded-lg"
+          className="mt-3 px-3.5 py-1.5 text-xs font-semibold text-white bg-indigo-600 rounded-md"
         >
-          Back to Members
+          Back to Directory
         </button>
       </div>
     );
@@ -88,35 +87,35 @@ export const MemberProfile = () => {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center space-x-2 text-xs text-slate-500 no-print">
+      <div className="no-print">
         <button
           onClick={() => navigate('/members')}
-          className="hover:underline flex items-center gap-1 font-medium"
+          className="text-xs font-medium text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 inline-flex items-center gap-1 transition-colors"
         >
-          <ArrowLeft className="w-3.5 h-3.5" /> Back to Members
+          <ArrowLeft className="w-3.5 h-3.5" /> Back to Directory
         </button>
       </div>
 
-      {/* Member Header Card */}
-      <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200/80 dark:border-slate-800 p-6 shadow-xs">
+      {/* Member Financial Card */}
+      <div className="bg-white dark:bg-[#111625] rounded-lg border border-[#e2e4e9] dark:border-[#1e283d] p-5 shadow-xs">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-          <div className="flex items-start space-x-4">
-            <div className="w-16 h-16 rounded-2xl bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-400 font-bold text-2xl flex items-center justify-center border border-indigo-200 dark:border-indigo-800 shrink-0">
+          <div className="flex items-start space-x-3.5">
+            <div className="w-12 h-12 rounded-lg bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-400 font-bold text-xl flex items-center justify-center border border-indigo-200 dark:border-indigo-800 shrink-0">
               {member.fullName.charAt(0)}
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <h1 className="text-xl font-bold text-slate-900 dark:text-white">
+                <h1 className="text-lg font-bold text-slate-900 dark:text-white">
                   {member.fullName}
                 </h1>
-                <span className="font-mono text-xs px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-500 font-semibold">
+                <span className="font-mono text-xs text-slate-400 font-medium">
                   {member.id}
                 </span>
                 <StatusBadge status={member.status} />
               </div>
 
-              <div className="mt-2 flex flex-wrap gap-4 text-xs text-slate-500 dark:text-slate-400">
-                <span className="flex items-center gap-1">
+              <div className="mt-1 flex flex-wrap gap-3.5 text-xs text-slate-500 dark:text-slate-400">
+                <span className="flex items-center gap-1 font-mono">
                   <Phone className="w-3.5 h-3.5 text-slate-400" />
                   {member.mobileNumber}
                 </span>
@@ -130,33 +129,28 @@ export const MemberProfile = () => {
                   <MapPin className="w-3.5 h-3.5 text-slate-400" />
                   {member.address}, {member.city}
                 </span>
-                <span className="flex items-center gap-1">
-                  <Calendar className="w-3.5 h-3.5 text-slate-400" />
-                  Joined: {formatDate(member.joiningDate)}
-                </span>
               </div>
             </div>
           </div>
 
-          {/* Action buttons */}
           <div className="flex items-center gap-2 no-print">
             <button
               onClick={handleExportLedgerCSV}
-              className="px-3 py-2 text-xs font-semibold text-slate-700 dark:text-slate-200 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 rounded-lg flex items-center gap-1.5"
+              className="px-3 py-1.5 text-xs font-medium text-slate-700 dark:text-slate-300 bg-white dark:bg-[#182032] border border-[#e2e4e9] dark:border-[#1e283d] rounded-md hover:bg-slate-50 flex items-center gap-1.5"
             >
-              <Download className="w-3.5 h-3.5" />
-              <span>Statement CSV</span>
+              <Download className="w-3.5 h-3.5 text-slate-400" />
+              <span>Statement</span>
             </button>
             <button
               onClick={handlePrintLedger}
-              className="px-3 py-2 text-xs font-semibold text-slate-700 dark:text-slate-200 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 rounded-lg flex items-center gap-1.5"
+              className="px-3 py-1.5 text-xs font-medium text-slate-700 dark:text-slate-300 bg-white dark:bg-[#182032] border border-[#e2e4e9] dark:border-[#1e283d] rounded-md hover:bg-slate-50 flex items-center gap-1.5"
             >
-              <Printer className="w-3.5 h-3.5" />
-              <span>Print Ledger</span>
+              <Printer className="w-3.5 h-3.5 text-slate-400" />
+              <span>Print</span>
             </button>
             <button
               onClick={() => navigate(`/payments?memberId=${member.id}`)}
-              className="px-3.5 py-2 text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg shadow-xs flex items-center gap-1.5"
+              className="px-3.5 py-1.5 text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-700 rounded-md shadow-xs flex items-center gap-1.5"
             >
               <CreditCard className="w-3.5 h-3.5" />
               <span>Collect Payment</span>
@@ -165,21 +159,21 @@ export const MemberProfile = () => {
         </div>
 
         {/* Member Nominee and KYC summary */}
-        <div className="mt-5 pt-4 border-t border-slate-100 dark:border-slate-800 grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs">
-          <div className="p-3 bg-slate-50 dark:bg-slate-800/40 rounded-lg border border-slate-200/60 dark:border-slate-700/60">
-            <span className="text-slate-400 text-[11px] uppercase font-semibold">Nominee Information</span>
-            <p className="font-bold text-slate-800 dark:text-slate-200 mt-1">{member.nomineeName}</p>
-            <p className="text-slate-500">{member.nomineeRelationship} • {member.nomineeMobile}</p>
+        <div className="mt-4 pt-3.5 border-t border-[#e2e4e9]/70 dark:border-[#1e283d] grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
+          <div className="p-2.5 bg-slate-50 dark:bg-[#182032] rounded border border-[#e2e4e9]/60 dark:border-[#1e283d]">
+            <span className="text-slate-400 text-[10px] uppercase font-mono">Nominee Details</span>
+            <p className="font-semibold text-slate-800 dark:text-slate-200 mt-0.5">{member.nomineeName}</p>
+            <p className="text-slate-500 font-mono text-[11px]">{member.nomineeRelationship} • {member.nomineeMobile}</p>
           </div>
-          <div className="p-3 bg-slate-50 dark:bg-slate-800/40 rounded-lg border border-slate-200/60 dark:border-slate-700/60">
-            <span className="text-slate-400 text-[11px] uppercase font-semibold">Subscribed Chits</span>
+          <div className="p-2.5 bg-slate-50 dark:bg-[#182032] rounded border border-[#e2e4e9]/60 dark:border-[#1e283d]">
+            <span className="text-slate-400 text-[10px] uppercase font-mono">Subscribed Circles</span>
             <div className="mt-1 flex flex-wrap gap-1">
               {member.assignedGroupIds?.map((gid) => {
                 const grp = groups.find((g) => g.id === gid);
                 return (
                   <span
                     key={gid}
-                    className="px-2 py-0.5 rounded text-[10px] font-semibold bg-indigo-50 dark:bg-indigo-950/40 text-indigo-700 dark:text-indigo-300 border border-indigo-100 dark:border-indigo-900"
+                    className="px-1.5 py-0.2 rounded text-[10px] font-medium bg-indigo-50 dark:bg-indigo-950/40 text-indigo-700 dark:text-indigo-300 border border-indigo-100 dark:border-indigo-900"
                   >
                     {grp ? grp.name : gid}
                   </span>
@@ -187,10 +181,10 @@ export const MemberProfile = () => {
               })}
             </div>
           </div>
-          <div className="p-3 bg-slate-50 dark:bg-slate-800/40 rounded-lg border border-slate-200/60 dark:border-slate-700/60">
-            <span className="text-slate-400 text-[11px] uppercase font-semibold">Notes / Remarks</span>
-            <p className="text-slate-700 dark:text-slate-300 mt-1 italic">
-              {member.notes || 'Clean repayment track record.'}
+          <div className="p-2.5 bg-slate-50 dark:bg-[#182032] rounded border border-[#e2e4e9]/60 dark:border-[#1e283d]">
+            <span className="text-slate-400 text-[10px] uppercase font-mono">KYC Audit Remarks</span>
+            <p className="text-slate-700 dark:text-slate-300 mt-0.5 italic text-[11px]">
+              {member.notes || 'Verified repayment standing.'}
             </p>
           </div>
         </div>
@@ -198,50 +192,50 @@ export const MemberProfile = () => {
 
       {/* Financial Aggregates Bar */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-        <div className="p-4 bg-white dark:bg-slate-900 rounded-xl border border-slate-200/80 dark:border-slate-800">
-          <span className="text-[11px] font-semibold text-slate-400 uppercase">Total Obligation</span>
-          <p className="text-xl font-bold text-slate-900 dark:text-white mt-1">
+        <div className="p-4 bg-white dark:bg-[#111625] rounded-lg border border-[#e2e4e9] dark:border-[#1e283d]">
+          <span className="text-[10px] font-mono text-slate-400 uppercase">Cumulative Target</span>
+          <p className="text-lg font-bold text-slate-900 dark:text-white mt-0.5 font-mono">
             {formatCurrency(totalExpected)}
           </p>
-          <p className="text-[11px] text-slate-500 mt-0.5">{memberInstallments.length} scheduled installments</p>
+          <p className="text-[11px] text-slate-500">{memberInstallments.length} scheduled cycles</p>
         </div>
-        <div className="p-4 bg-white dark:bg-slate-900 rounded-xl border border-slate-200/80 dark:border-slate-800">
-          <span className="text-[11px] font-semibold text-slate-400 uppercase">Total Paid</span>
-          <p className="text-xl font-bold text-emerald-600 dark:text-emerald-400 mt-1">
+        <div className="p-4 bg-white dark:bg-[#111625] rounded-lg border border-[#e2e4e9] dark:border-[#1e283d]">
+          <span className="text-[10px] font-mono text-slate-400 uppercase">Total Settled</span>
+          <p className="text-lg font-bold text-emerald-600 dark:text-emerald-400 mt-0.5 font-mono">
             {formatCurrency(totalPaid)}
           </p>
-          <p className="text-[11px] text-slate-500 mt-0.5">{paidCount} installments settled</p>
+          <p className="text-[11px] text-slate-500">{paidCount} installments paid</p>
         </div>
-        <div className="p-4 bg-white dark:bg-slate-900 rounded-xl border border-slate-200/80 dark:border-slate-800">
-          <span className="text-[11px] font-semibold text-slate-400 uppercase">Outstanding Balance</span>
-          <p className="text-xl font-bold text-amber-600 dark:text-amber-400 mt-1">
+        <div className="p-4 bg-white dark:bg-[#111625] rounded-lg border border-[#e2e4e9] dark:border-[#1e283d]">
+          <span className="text-[10px] font-mono text-slate-400 uppercase">Current Outstanding</span>
+          <p className="text-lg font-bold text-amber-600 dark:text-amber-400 mt-0.5 font-mono">
             {formatCurrency(totalPending)}
           </p>
-          <p className="text-[11px] text-slate-500 mt-0.5">{pendingCount} remaining / pending</p>
+          <p className="text-[11px] text-slate-500">{pendingCount} remaining cycles</p>
         </div>
-        <div className="p-4 bg-white dark:bg-slate-900 rounded-xl border border-slate-200/80 dark:border-slate-800">
-          <span className="text-[11px] font-semibold text-slate-400 uppercase">Repayment Rate</span>
-          <p className="text-xl font-bold text-indigo-600 dark:text-indigo-400 mt-1">
+        <div className="p-4 bg-white dark:bg-[#111625] rounded-lg border border-[#e2e4e9] dark:border-[#1e283d]">
+          <span className="text-[10px] font-mono text-slate-400 uppercase">Repayment Rate</span>
+          <p className="text-lg font-bold text-indigo-600 dark:text-indigo-400 mt-0.5">
             {completionRate}%
           </p>
-          <div className="w-full h-1.5 bg-slate-100 dark:bg-slate-800 rounded-full mt-1.5 overflow-hidden">
+          <div className="w-full h-1 bg-slate-100 dark:bg-slate-800 rounded-full mt-1.5 overflow-hidden">
             <div className="h-full bg-indigo-600 rounded-full" style={{ width: `${completionRate}%` }} />
           </div>
         </div>
       </div>
 
-      {/* Tabs */}
-      <div className="border-b border-slate-200 dark:border-slate-800 no-print">
+      {/* Ledger Workspace Tabs */}
+      <div className="border-b border-[#e2e4e9] dark:border-[#1e283d] no-print">
         <nav className="flex space-x-6 text-xs font-semibold">
           {[
-            { id: 'ledger', label: `Complete Ledger Schedule (${memberInstallments.length})` },
-            { id: 'receipts', label: `Payment History & Receipts (${memberTransactions.length})` },
-            { id: 'payouts', label: `Auction Payouts Received (${memberPayouts.length})` },
+            { id: 'ledger', label: `Scheduled Ledger (${memberInstallments.length})` },
+            { id: 'receipts', label: `Transactions & Receipts (${memberTransactions.length})` },
+            { id: 'payouts', label: `Auction Draws Won (${memberPayouts.length})` },
           ].map((tab) => (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`pb-3 border-b-2 transition-all ${
+              className={`pb-2.5 border-b-2 font-medium transition-all ${
                 activeTab === tab.id
                   ? 'border-indigo-600 text-indigo-600 dark:text-indigo-400 font-bold'
                   : 'border-transparent text-slate-500 hover:text-slate-800 dark:hover:text-slate-300'
@@ -253,47 +247,47 @@ export const MemberProfile = () => {
         </nav>
       </div>
 
-      {/* Tab Panels */}
+      {/* Tab 1: Ledger */}
       {activeTab === 'ledger' && (
-        <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200/80 dark:border-slate-800 overflow-hidden shadow-xs">
+        <div className="bg-white dark:bg-[#111625] rounded-lg border border-[#e2e4e9] dark:border-[#1e283d] overflow-hidden shadow-xs">
           <table className="w-full text-left text-xs">
-            <thead className="bg-slate-50 dark:bg-slate-800/40 text-slate-500 uppercase tracking-wider border-b border-slate-200 dark:border-slate-800">
+            <thead className="bg-slate-50 dark:bg-slate-800/40 text-slate-500 uppercase tracking-wider border-b border-[#e2e4e9] dark:border-[#1e283d] font-mono text-[10px]">
               <tr>
-                <th className="px-4 py-3">Group</th>
-                <th className="px-4 py-3">Installment</th>
-                <th className="px-4 py-3">Due Date</th>
-                <th className="px-4 py-3">Expected Amount</th>
-                <th className="px-4 py-3">Paid Amount</th>
-                <th className="px-4 py-3">Balance Remaining</th>
-                <th className="px-4 py-3">Payment Date</th>
-                <th className="px-4 py-3">Status</th>
-                <th className="px-4 py-3 no-print">Action</th>
+                <th className="px-4 py-2.5">Chit Group</th>
+                <th className="px-4 py-2.5">Installment</th>
+                <th className="px-4 py-2.5">Due Date</th>
+                <th className="px-4 py-2.5">Expected Due</th>
+                <th className="px-4 py-2.5">Paid Inflow</th>
+                <th className="px-4 py-2.5">Outstanding Balance</th>
+                <th className="px-4 py-2.5">Payment Date</th>
+                <th className="px-4 py-2.5">Status</th>
+                <th className="px-4 py-2.5 text-right no-print">Action</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+            <tbody className="divide-y divide-[#e2e4e9]/70 dark:divide-[#1e283d]">
               {memberInstallments.map((ins) => {
                 const grp = groups.find((g) => g.id === ins.groupId);
                 return (
                   <tr key={ins.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/30">
-                    <td className="px-4 py-3 font-semibold text-slate-900 dark:text-white">
+                    <td className="px-4 py-2.5 font-semibold text-slate-900 dark:text-white">
                       {grp?.name || ins.groupId}
                     </td>
-                    <td className="px-4 py-3 font-medium">Month {ins.installmentNumber}</td>
-                    <td className="px-4 py-3 text-slate-500">{formatDate(ins.dueDate)}</td>
-                    <td className="px-4 py-3 font-semibold">{formatCurrency(ins.expectedAmount)}</td>
-                    <td className="px-4 py-3 font-bold text-emerald-600">
+                    <td className="px-4 py-2.5 font-medium">Month #{ins.installmentNumber}</td>
+                    <td className="px-4 py-2.5 text-slate-500 font-mono">{formatDate(ins.dueDate)}</td>
+                    <td className="px-4 py-2.5 font-medium font-mono">{formatCurrency(ins.expectedAmount)}</td>
+                    <td className="px-4 py-2.5 font-bold text-emerald-600 font-mono">
                       {formatCurrency(ins.paidAmount)}
                     </td>
-                    <td className="px-4 py-3 font-bold text-rose-600">
+                    <td className="px-4 py-2.5 font-bold text-rose-600 font-mono">
                       {formatCurrency(ins.remainingAmount)}
                     </td>
-                    <td className="px-4 py-3 text-slate-500">
+                    <td className="px-4 py-2.5 text-slate-500 font-mono">
                       {ins.paymentDate ? formatDate(ins.paymentDate) : '-'}
                     </td>
-                    <td className="px-4 py-3">
+                    <td className="px-4 py-2.5">
                       <StatusBadge status={ins.status} />
                     </td>
-                    <td className="px-4 py-3 no-print">
+                    <td className="px-4 py-2.5 text-right no-print">
                       {ins.remainingAmount > 0 && (
                         <button
                           onClick={() =>
@@ -315,41 +309,41 @@ export const MemberProfile = () => {
         </div>
       )}
 
-      {/* Receipts Tab */}
+      {/* Tab 2: Receipts */}
       {activeTab === 'receipts' && (
-        <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200/80 dark:border-slate-800 overflow-hidden shadow-xs">
+        <div className="bg-white dark:bg-[#111625] rounded-lg border border-[#e2e4e9] dark:border-[#1e283d] overflow-hidden shadow-xs">
           <table className="w-full text-left text-xs">
-            <thead className="bg-slate-50 dark:bg-slate-800/40 text-slate-500 uppercase tracking-wider border-b border-slate-200 dark:border-slate-800">
+            <thead className="bg-slate-50 dark:bg-slate-800/40 text-slate-500 uppercase tracking-wider border-b border-[#e2e4e9] dark:border-[#1e283d] font-mono text-[10px]">
               <tr>
-                <th className="px-4 py-3">Receipt Number</th>
-                <th className="px-4 py-3">Installment</th>
-                <th className="px-4 py-3">Date</th>
-                <th className="px-4 py-3">Amount Received</th>
-                <th className="px-4 py-3">Payment Method</th>
-                <th className="px-4 py-3">Reference / Txn ID</th>
-                <th className="px-4 py-3">Remaining Balance</th>
-                <th className="px-4 py-3">Action</th>
+                <th className="px-4 py-2.5">Receipt Number</th>
+                <th className="px-4 py-2.5">Installment</th>
+                <th className="px-4 py-2.5">Payment Date</th>
+                <th className="px-4 py-2.5">Amount Received</th>
+                <th className="px-4 py-2.5">Payment Method</th>
+                <th className="px-4 py-2.5">Transaction Ref</th>
+                <th className="px-4 py-2.5">Balance Remaining</th>
+                <th className="px-4 py-2.5 text-right">Action</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+            <tbody className="divide-y divide-[#e2e4e9]/70 dark:divide-[#1e283d]">
               {memberTransactions.map((tx) => (
                 <tr key={tx.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/30">
-                  <td className="px-4 py-3 font-mono font-semibold text-indigo-600 dark:text-indigo-400">
+                  <td className="px-4 py-2.5 font-mono font-bold text-indigo-600 dark:text-indigo-400">
                     {tx.receiptNumber}
                   </td>
-                  <td className="px-4 py-3">Month {tx.installmentNumber}</td>
-                  <td className="px-4 py-3 text-slate-500">{formatDate(tx.paymentDate)}</td>
-                  <td className="px-4 py-3 font-bold text-emerald-600">{formatCurrency(tx.amount)}</td>
-                  <td className="px-4 py-3">
-                    <span className="px-2 py-0.5 rounded-sm bg-slate-100 dark:bg-slate-800 font-medium">
-                      {tx.paymentMethod}
-                    </span>
+                  <td className="px-4 py-2.5">Month #{tx.installmentNumber}</td>
+                  <td className="px-4 py-2.5 text-slate-500 font-mono">{formatDate(tx.paymentDate)}</td>
+                  <td className="px-4 py-2.5 font-bold text-emerald-600 font-mono">
+                    {formatCurrency(tx.amount)}
                   </td>
-                  <td className="px-4 py-3 font-mono text-slate-400">{tx.referenceNumber}</td>
-                  <td className="px-4 py-3 font-semibold text-slate-700 dark:text-slate-300">
+                  <td className="px-4 py-2.5">
+                    <span className="font-mono text-slate-600 dark:text-slate-300">{tx.paymentMethod}</span>
+                  </td>
+                  <td className="px-4 py-2.5 font-mono text-slate-400">{tx.referenceNumber}</td>
+                  <td className="px-4 py-2.5 font-semibold text-slate-700 dark:text-slate-300 font-mono">
                     {formatCurrency(tx.remainingBalance)}
                   </td>
-                  <td className="px-4 py-3">
+                  <td className="px-4 py-2.5 text-right">
                     <button
                       onClick={() => navigate(`/receipts?receiptNumber=${tx.receiptNumber}`)}
                       className="text-xs text-indigo-600 hover:underline font-semibold"
@@ -364,40 +358,42 @@ export const MemberProfile = () => {
         </div>
       )}
 
-      {/* Payouts Tab */}
+      {/* Tab 3: Payouts */}
       {activeTab === 'payouts' && (
-        <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200/80 dark:border-slate-800 overflow-hidden shadow-xs">
+        <div className="bg-white dark:bg-[#111625] rounded-lg border border-[#e2e4e9] dark:border-[#1e283d] overflow-hidden shadow-xs">
           {memberPayouts.length === 0 ? (
-            <div className="p-8 text-center text-slate-500 text-xs">
-              This member has not claimed any auction draw prizes yet.
+            <div className="p-8 text-center text-slate-400 text-xs">
+              This subscriber has not claimed any auction draw prizes yet.
             </div>
           ) : (
             <table className="w-full text-left text-xs">
-              <thead className="bg-slate-50 dark:bg-slate-800/40 text-slate-500 uppercase tracking-wider border-b border-slate-200 dark:border-slate-800">
+              <thead className="bg-slate-50 dark:bg-slate-800/40 text-slate-500 uppercase tracking-wider border-b border-[#e2e4e9] dark:border-[#1e283d] font-mono text-[10px]">
                 <tr>
-                  <th className="px-4 py-3">Chit Group</th>
-                  <th className="px-4 py-3">Month Won</th>
-                  <th className="px-4 py-3">Gross Chit</th>
-                  <th className="px-4 py-3">Bid Discount</th>
-                  <th className="px-4 py-3">Foreman Commission</th>
-                  <th className="px-4 py-3">Net Disbursed</th>
-                  <th className="px-4 py-3">Disbursement Date</th>
+                  <th className="px-4 py-2.5">Chit Group</th>
+                  <th className="px-4 py-2.5">Month Won</th>
+                  <th className="px-4 py-2.5">Gross Pool</th>
+                  <th className="px-4 py-2.5">Winning Bid Discount</th>
+                  <th className="px-4 py-2.5">Company Commission</th>
+                  <th className="px-4 py-2.5">Net Disbursed</th>
+                  <th className="px-4 py-2.5">Date</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+              <tbody className="divide-y divide-[#e2e4e9]/70 dark:divide-[#1e283d]">
                 {memberPayouts.map((po) => (
                   <tr key={po.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/30">
-                    <td className="px-4 py-3 font-semibold text-slate-900 dark:text-white">
+                    <td className="px-4 py-2.5 font-semibold text-slate-900 dark:text-white">
                       {po.groupName}
                     </td>
-                    <td className="px-4 py-3 font-bold">Month {po.installmentNumber}</td>
-                    <td className="px-4 py-3">{formatCurrency(po.grossAmount)}</td>
-                    <td className="px-4 py-3 text-rose-600 font-semibold">
+                    <td className="px-4 py-2.5 font-bold">Month #{po.installmentNumber}</td>
+                    <td className="px-4 py-2.5 font-mono">{formatCurrency(po.grossAmount)}</td>
+                    <td className="px-4 py-2.5 text-rose-600 font-semibold font-mono">
                       -{formatCurrency(po.discountBidAmount)}
                     </td>
-                    <td className="px-4 py-3">{formatCurrency(po.companyCommissionAmount)}</td>
-                    <td className="px-4 py-3 font-bold text-indigo-600">{formatCurrency(po.netPayoutAmount)}</td>
-                    <td className="px-4 py-3 text-slate-500">{formatDate(po.payoutDate)}</td>
+                    <td className="px-4 py-2.5 font-mono">{formatCurrency(po.companyCommissionAmount)}</td>
+                    <td className="px-4 py-2.5 font-bold text-indigo-600 font-mono">
+                      {formatCurrency(po.netPayoutAmount)}
+                    </td>
+                    <td className="px-4 py-2.5 text-slate-500 font-mono">{formatDate(po.payoutDate)}</td>
                   </tr>
                 ))}
               </tbody>
@@ -408,4 +404,3 @@ export const MemberProfile = () => {
     </div>
   );
 };
-

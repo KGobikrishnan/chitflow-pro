@@ -8,12 +8,12 @@ import {
   Eye,
   Trash2,
   Filter,
+  Users,
 } from 'lucide-react';
 import { useAppStore } from '../../store/useAppStore';
 import { formatCurrency } from '../../utils/currency';
 import { formatDate } from '../../utils/date';
 import { exportToCSV } from '../../utils/export';
-import { PageHeader } from '../../components/common/PageHeader';
 import { StatusBadge } from '../../components/common/StatusBadge';
 import { DataTable } from '../../components/common/DataTable';
 import { ConfirmDialog } from '../../components/common/ConfirmDialog';
@@ -42,7 +42,6 @@ export const MemberList = () => {
       const totalPaid = memberInst.reduce((sum, ins) => sum + (ins.paidAmount || 0), 0);
       const totalPending = memberInst.reduce((sum, ins) => sum + (ins.remainingAmount || 0), 0);
 
-      // Find next due
       const nextDueInst = memberInst
         .filter((ins) => ins.remainingAmount > 0)
         .sort((a, b) => new Date(a.dueDate) - new Date(b.dueDate))[0];
@@ -58,17 +57,17 @@ export const MemberList = () => {
   const columns = [
     {
       accessorKey: 'id',
-      header: 'Member ID',
+      header: 'ID',
       cell: ({ row }) => (
         <span className="font-mono text-xs text-slate-500 font-semibold">{row.original.id}</span>
       ),
     },
     {
       accessorKey: 'fullName',
-      header: 'Member Name',
+      header: 'Subscriber Name',
       cell: ({ row }) => (
         <div className="flex items-center space-x-2.5">
-          <div className="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 font-bold text-xs flex items-center justify-center shrink-0 border border-slate-200 dark:border-slate-700">
+          <div className="w-7 h-7 rounded bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-400 font-bold text-xs flex items-center justify-center shrink-0 border border-indigo-200 dark:border-indigo-800">
             {row.original.fullName.charAt(0)}
           </div>
           <div>
@@ -76,7 +75,7 @@ export const MemberList = () => {
               {row.original.fullName}
             </div>
             <div className="text-[11px] text-slate-400 flex items-center gap-1">
-              <MapPin className="w-3 h-3" /> {row.original.city}
+              <MapPin className="w-3 h-3 text-slate-400" /> {row.original.city}
             </div>
           </div>
         </div>
@@ -86,7 +85,7 @@ export const MemberList = () => {
       accessorKey: 'mobileNumber',
       header: 'Mobile',
       cell: ({ row }) => (
-        <div className="text-xs text-slate-600 dark:text-slate-300 font-medium flex items-center gap-1">
+        <div className="text-xs text-slate-600 dark:text-slate-300 font-medium font-mono flex items-center gap-1">
           <Phone className="w-3 h-3 text-slate-400" />
           {row.original.mobileNumber}
         </div>
@@ -104,7 +103,7 @@ export const MemberList = () => {
               return (
                 <span
                   key={gid}
-                  className="px-2 py-0.5 rounded text-[10px] font-semibold bg-indigo-50 dark:bg-indigo-950/40 text-indigo-700 dark:text-indigo-300 border border-indigo-100 dark:border-indigo-900"
+                  className="px-1.5 py-0.2 rounded text-[10px] font-medium bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700"
                 >
                   {grp ? grp.name : gid}
                 </span>
@@ -118,16 +117,16 @@ export const MemberList = () => {
       accessorKey: 'totalPaid',
       header: 'Total Paid',
       cell: ({ row }) => (
-        <span className="font-bold text-emerald-600 dark:text-emerald-400">
+        <span className="font-bold text-emerald-600 dark:text-emerald-400 font-mono">
           {formatCurrency(row.original.totalPaid)}
         </span>
       ),
     },
     {
       accessorKey: 'totalPending',
-      header: 'Total Pending',
+      header: 'Pending Balance',
       cell: ({ row }) => (
-        <span className="font-bold text-amber-600 dark:text-amber-400">
+        <span className="font-bold text-amber-600 dark:text-amber-400 font-mono">
           {formatCurrency(row.original.totalPending)}
         </span>
       ),
@@ -136,7 +135,7 @@ export const MemberList = () => {
       accessorKey: 'nextDueDate',
       header: 'Next Due',
       cell: ({ row }) => (
-        <span className="text-xs text-slate-500">
+        <span className="text-xs text-slate-500 font-mono">
           {row.original.nextDueDate ? formatDate(row.original.nextDueDate) : 'Clear'}
         </span>
       ),
@@ -148,22 +147,22 @@ export const MemberList = () => {
     },
     {
       id: 'actions',
-      header: 'Actions',
+      header: '',
       cell: ({ row }) => (
-        <div className="flex items-center space-x-2">
+        <div className="flex items-center justify-end space-x-1.5">
           <button
             onClick={() => navigate(`/members/${row.original.id}`)}
-            className="p-1.5 text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-950/40 rounded-md"
-            title="View Member Ledger"
+            className="p-1.5 text-slate-500 hover:text-indigo-600 hover:bg-slate-100 dark:hover:bg-slate-800 rounded transition-colors"
+            title="Open Member Ledger"
           >
-            <Eye className="w-4 h-4" />
+            <Eye className="w-3.5 h-3.5" />
           </button>
           <button
             onClick={() => setMemberToDelete(row.original)}
-            className="p-1.5 text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/40 rounded-md"
+            className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-slate-100 dark:hover:bg-slate-800 rounded transition-colors"
             title="Delete Member"
           >
-            <Trash2 className="w-4 h-4" />
+            <Trash2 className="w-3.5 h-3.5" />
           </button>
         </div>
       ),
@@ -195,43 +194,53 @@ export const MemberList = () => {
 
   return (
     <div className="space-y-6">
-      <PageHeader
-        title="Member Management"
-        subtitle="Maintain KYC profiles, assigned chit subscriptions, and complete payment ledgers"
-        breadcrumbs={['ChitFlow', 'Members']}
-        action={
-          <div className="flex items-center gap-2">
-            <button
-              onClick={handleExport}
-              className="px-3.5 py-2 text-xs font-semibold text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 rounded-lg shadow-xs flex items-center gap-1.5"
-            >
-              <Download className="w-3.5 h-3.5" />
-              <span>Export CSV</span>
-            </button>
-            <button
-              onClick={() => setIsAddModalOpen(true)}
-              className="px-3.5 py-2 text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg shadow-xs flex items-center gap-1.5 transition-all"
-            >
-              <UserPlus className="w-3.5 h-3.5" />
-              <span>Add Member</span>
-            </button>
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-4 border-b border-[#e2e4e9] dark:border-[#1e283d]">
+        <div>
+          <div className="flex items-center space-x-2">
+            <h1 className="text-xl font-bold tracking-tight text-slate-900 dark:text-white">
+              Member Directory
+            </h1>
+            <span className="px-2 py-0.5 rounded text-[10px] font-mono font-medium bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">
+              {members.length} Registered
+            </span>
           </div>
-        }
-      />
+          <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+            Audit member KYC records, nominee nomination, and subscription payment ledgers.
+          </p>
+        </div>
+
+        <div className="flex items-center gap-2">
+          <button
+            onClick={handleExport}
+            className="px-3 py-1.5 text-xs font-medium text-slate-700 dark:text-slate-300 bg-white dark:bg-[#111625] border border-[#e2e4e9] dark:border-[#1e283d] rounded-md hover:bg-slate-50 flex items-center gap-1.5"
+          >
+            <Download className="w-3.5 h-3.5 text-slate-400" />
+            <span>Export CSV</span>
+          </button>
+          <button
+            onClick={() => setIsAddModalOpen(true)}
+            className="px-3.5 py-1.5 text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-700 rounded-md shadow-xs flex items-center gap-1.5 transition-colors"
+          >
+            <UserPlus className="w-3.5 h-3.5" />
+            <span>Add Member</span>
+          </button>
+        </div>
+      </div>
 
       <DataTable
         columns={columns}
         data={tableData}
-        searchPlaceholder="Search member name, ID, phone or city..."
+        searchPlaceholder="Filter by subscriber name, ID, phone, city..."
         filterComponent={
           <div className="flex items-center space-x-2">
             <Filter className="w-3.5 h-3.5 text-slate-400" />
             <select
               value={selectedGroupFilter}
               onChange={(e) => setSelectedGroupFilter(e.target.value)}
-              className="text-xs bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg px-2.5 py-1.5 text-slate-700 dark:text-slate-200 focus:outline-hidden"
+              className="text-xs bg-slate-50 dark:bg-[#182032] border border-[#e2e4e9] dark:border-[#1e283d] rounded-md px-2.5 py-1 text-slate-700 dark:text-slate-300"
             >
-              <option value="ALL">All Chit Groups</option>
+              <option value="ALL">All Chit Circles</option>
               {groups.map((g) => (
                 <option key={g.id} value={g.id}>
                   {g.name}
@@ -246,9 +255,9 @@ export const MemberList = () => {
 
       <ConfirmDialog
         isOpen={!!memberToDelete}
-        title="Delete Member"
-        message={`Are you sure you want to delete ${memberToDelete?.fullName}? All associated membership records will be permanently removed.`}
-        confirmText="Yes, Delete Member"
+        title="Remove Member"
+        message={`Remove ${memberToDelete?.fullName} from directory? Associated historical transactions and receipts will be updated.`}
+        confirmText="Confirm Removal"
         isDestructive={true}
         onConfirm={confirmDeleteMember}
         onClose={() => setMemberToDelete(null)}
@@ -256,4 +265,3 @@ export const MemberList = () => {
     </div>
   );
 };
-
