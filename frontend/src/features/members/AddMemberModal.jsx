@@ -182,12 +182,20 @@ export const AddMemberModal = ({ isOpen, onClose }) => {
                 <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">
                   Relationship *
                 </label>
-                <input
-                  type="text"
-                  placeholder="e.g. Spouse / Brother"
+                <select
                   {...register('nomineeRelationship')}
                   className="w-full px-3 py-1.5 bg-slate-50 dark:bg-[#182032] border border-[#e2e4e9] dark:border-[#1e283d] rounded-md text-slate-900 dark:text-white"
-                />
+                >
+                  <option value="Spouse">Spouse (மனைவி / கணவர்)</option>
+                  <option value="Father">Father (தந்தை)</option>
+                  <option value="Mother">Mother (தாய்)</option>
+                  <option value="Son">Son (மகன்)</option>
+                  <option value="Daughter">Daughter (மகள்)</option>
+                  <option value="Brother">Brother (சகோதரன்)</option>
+                  <option value="Sister">Sister (சகோதரி)</option>
+                  <option value="Business Partner">Business Partner</option>
+                  <option value="Other Legal Heir">Other Legal Heir</option>
+                </select>
                 {errors.nomineeRelationship && (
                   <p className="text-rose-500 mt-1">{errors.nomineeRelationship.message}</p>
                 )}

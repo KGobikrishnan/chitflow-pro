@@ -11,6 +11,8 @@ import {
   ShieldCheck,
   CheckCircle2,
   X,
+  Volume2,
+  VolumeX,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { payoutSchema } from '../../utils/validators';
@@ -90,6 +92,9 @@ export const PayoutList = () => {
           </button>
         </div>
       </div>
+
+      {/* Audio Explainer Banner */}
+      <AudioExplainer />
 
       {/* KPI Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-4 gap-4 text-xs">
@@ -202,6 +207,80 @@ export const PayoutList = () => {
   );
 };
 
+const AudioExplainer = () => {
+  const [isPlaying, setIsPlaying] = useState(false);
+
+  const speechScript = `Hello Admin! Here is how Net Disbursement is calculated according to the Tamil Nadu Chit Funds Act: 
+First, start with the Gross Pool Value. For example, five lakh rupees. 
+When the monthly auction is held, subscribers bid a discount. Suppose the winning bid discount is sixty thousand rupees. 
+The Net Disbursement given to the winning subscriber is Gross Chit Value minus the Bid Discount. That is five lakhs minus sixty thousand, which equals four lakh forty thousand rupees. 
+Next, from the sixty thousand discount, the foreman statutory commission of five percent on gross chit value, which is twenty-five thousand rupees, is deducted. 
+The remaining thirty-five thousand rupees becomes the dividend pool, which is distributed equally among all subscribers as an installment discount for the following month!`;
+
+  const handlePlayVoiceNote = () => {
+    if (!('speechSynthesis' in window)) {
+      alert('Speech synthesis is not supported in this browser.');
+      return;
+    }
+
+    if (isPlaying) {
+      window.speechSynthesis.cancel();
+      setIsPlaying(false);
+      return;
+    }
+
+    const utterance = new SpeechSynthesisUtterance(speechScript);
+    utterance.rate = 0.95;
+    utterance.pitch = 1.0;
+    utterance.onend = () => setIsPlaying(false);
+    utterance.onerror = () => setIsPlaying(false);
+
+    window.speechSynthesis.speak(utterance);
+    setIsPlaying(true);
+  };
+
+  return (
+    <div className="p-3 bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-950/40 dark:to-purple-950/30 rounded-lg border border-indigo-100 dark:border-indigo-900/50 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
+      <div className="flex items-start sm:items-center space-x-2.5">
+        <button
+          type="button"
+          onClick={handlePlayVoiceNote}
+          className={`w-9 h-9 rounded-full flex items-center justify-center shrink-0 transition-all ${
+            isPlaying
+              ? 'bg-rose-600 text-white animate-pulse shadow-md shadow-rose-600/30'
+              : 'bg-indigo-600 hover:bg-indigo-700 text-white shadow-md shadow-indigo-600/30'
+          }`}
+          title={isPlaying ? 'Stop Voice Note' : 'Listen to Voice Explanation'}
+        >
+          {isPlaying ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
+        </button>
+        <div>
+          <div className="flex items-center space-x-1.5">
+            <span className="font-bold text-slate-900 dark:text-white">
+              {isPlaying ? 'Playing Audio Explanation...' : 'Voice Note: How Net Disbursement is Calculated'}
+            </span>
+            <span className="text-[9px] font-mono px-1.5 py-0.2 rounded bg-indigo-200 dark:bg-indigo-800 text-indigo-900 dark:text-indigo-200 font-semibold">
+              AUDIO GUIDANCE
+            </span>
+          </div>
+          <p className="text-[11px] text-slate-600 dark:text-slate-400 mt-0.5">
+            Formula: <span className="font-mono font-bold text-indigo-700 dark:text-indigo-300">Net Disbursement = Gross Pool Amount - Winning Bid Discount</span>
+          </p>
+        </div>
+      </div>
+
+      <button
+        type="button"
+        onClick={handlePlayVoiceNote}
+        className="px-3 py-1.5 rounded-md text-xs font-semibold bg-white dark:bg-[#182032] border border-indigo-200 dark:border-indigo-800 text-indigo-700 dark:text-indigo-300 hover:bg-indigo-50 flex items-center gap-1.5 shrink-0 self-start sm:self-auto"
+      >
+        {isPlaying ? <VolumeX className="w-3.5 h-3.5" /> : <Volume2 className="w-3.5 h-3.5" />}
+        <span>{isPlaying ? 'Pause Voice' : 'Play Voice Note'}</span>
+      </button>
+    </div>
+  );
+};
+
 const CreatePayoutModal = ({ isOpen, onClose }) => {
   const groups = useAppStore((state) => state.groups);
   const members = useAppStore((state) => state.members);
@@ -308,14 +387,18 @@ const CreatePayoutModal = ({ isOpen, onClose }) => {
               </label>
               <select
                 {...register('memberId')}
-                className="w-full px-3 py-1.5 bg-slate-50 dark:bg-[#182032] border border-[#e2e4e9] dark:border-[#1e283d] rounded-md text-slate-900 dark:text-white"
+                disabled={!selectedGroupId}
+                className="w-full px-3 py-1.5 bg-slate-50 dark:bg-[#182032] border border-[#e2e4e9] dark:border-[#1e283d] rounded-md text-slate-900 dark:text-white disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                <option value="">-- Select Winner --</option>
-                {groupMembers.map((m) => (
-                  <option key={m.id} value={m.id}>
-                    {m.fullName} ({m.id})
-                  </option>
-                ))}
+                <option value="">
+                  {selectedGroupId ? '-- Select Winner from Circle --' : '-- Select Chit Circle First --'}
+                </option>
+                {selectedGroupId &&
+                  groupMembers.map((m) => (
+                    <option key={m.id} value={m.id}>
+                      {m.fullName} ({m.id})
+                    </option>
+                  ))}
               </select>
               {errors.memberId && <p className="text-rose-500 mt-1">{errors.memberId.message}</p>}
             </div>
@@ -358,12 +441,15 @@ const CreatePayoutModal = ({ isOpen, onClose }) => {
           </div>
 
           {/* Breakdown Preview */}
-          <div className="p-3 bg-indigo-50/60 dark:bg-indigo-950/30 rounded-md border border-indigo-100 dark:border-indigo-900/50 space-y-1 text-xs">
+          <div className="p-3 bg-indigo-50/60 dark:bg-indigo-950/30 rounded-md border border-indigo-100 dark:border-indigo-900/50 space-y-1.5 text-xs">
             <div className="flex justify-between font-bold text-indigo-900 dark:text-indigo-300 text-sm font-mono">
               <span>Net Disbursement to Winner:</span>
               <span>₹{netDisbursed.toLocaleString('en-IN')}</span>
             </div>
-            <div className="flex justify-between text-slate-600 dark:text-slate-400 font-mono text-[11px]">
+            <p className="text-[10px] text-slate-500 font-sans">
+              Calculated as: Gross Pool (₹{grossVal.toLocaleString('en-IN')}) - Bid Discount (₹{bidDiscount.toLocaleString('en-IN')})
+            </p>
+            <div className="flex justify-between text-slate-600 dark:text-slate-400 font-mono text-[11px] pt-1 border-t border-indigo-100 dark:border-indigo-900/50">
               <span>Foreman Commission (5%):</span>
               <span>₹{commissionAmount.toLocaleString('en-IN')}</span>
             </div>

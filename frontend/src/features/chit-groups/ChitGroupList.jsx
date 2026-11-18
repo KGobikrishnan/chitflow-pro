@@ -105,7 +105,20 @@ export const ChitGroupList = () => {
                 {/* Financial Metric Grid */}
                 <div className="mt-4 grid grid-cols-2 gap-3 py-3 border-y border-[#e2e4e9]/70 dark:border-[#1e283d] text-xs">
                   <div>
-                    <span className="text-slate-400 text-[10px] uppercase font-mono">Chit Value</span>
+                    <div className="flex items-center space-x-1.5">
+                      <span className="text-slate-400 text-[10px] uppercase font-mono">
+                        {group.planType === 'STANDARD' ? 'Standard Plan' : 'Variable Auction Plan'}
+                      </span>
+                      {group.planType === 'STANDARD' ? (
+                        <span className="px-1.5 py-0.2 rounded text-[9px] bg-indigo-100 dark:bg-indigo-900/60 text-indigo-700 dark:text-indigo-300 font-semibold">
+                          Gifts
+                        </span>
+                      ) : (
+                        <span className="px-1.5 py-0.2 rounded text-[9px] bg-purple-100 dark:bg-purple-900/60 text-purple-700 dark:text-purple-300 font-semibold">
+                          Auctions
+                        </span>
+                      )}
+                    </div>
                     <p className="text-sm font-bold text-slate-900 dark:text-white mt-0.5">
                       {formatCurrency(group.chitValue)}
                     </p>

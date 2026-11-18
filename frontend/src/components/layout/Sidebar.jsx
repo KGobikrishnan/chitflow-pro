@@ -16,8 +16,11 @@ import {
   ShieldCheck,
   Building2,
   ExternalLink,
+  Gift,
+  ArrowUpRight,
 } from 'lucide-react';
 import { useAppStore } from '../../store/useAppStore';
+import { Logo } from '../common/Logo';
 
 const navGroups = [
   {
@@ -30,11 +33,18 @@ const navGroups = [
     ],
   },
   {
+    title: 'DISBURSEMENTS & PAYABLES',
+    items: [
+      { name: 'Non-Auction Payments', href: '/disbursements', icon: ArrowUpRight },
+      { name: 'Gifts & Payables', href: '/gifts-payables', icon: Gift },
+      { name: 'Auctions & Payouts', href: '/payouts', icon: Trophy },
+    ],
+  },
+  {
     title: 'CHIT MANAGEMENT',
     items: [
       { name: 'Chit Groups', href: '/chit-groups', icon: Layers },
       { name: 'Members', href: '/members', icon: Users },
-      { name: 'Auctions & Payouts', href: '/payouts', icon: Trophy },
     ],
   },
   {
@@ -67,17 +77,26 @@ export const Sidebar = ({ mobileOpen, setMobileOpen, collapsed, setCollapsed }) 
         } ${mobileOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}`}
       >
         {/* Brand Bar */}
-        <div className="h-14 px-4 flex items-center justify-between border-b border-[#1a2236]">
-          <div className="flex items-center space-x-2.5 overflow-hidden">
-            <div className="w-7 h-7 rounded-md bg-indigo-600 flex items-center justify-center text-white font-bold text-xs shrink-0 shadow-xs">
-              CF
-            </div>
-            {!collapsed && (
-              <div className="leading-tight">
-                <span className="font-semibold text-white tracking-tight text-sm">ChitFlow</span>
-                <span className="ml-1.5 text-[9px] font-mono px-1 py-0.2 rounded bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
-                  SAAS
-                </span>
+        <div className="h-14 px-3 flex items-center justify-between border-b border-[#1a2236]">
+          <div className="flex items-center overflow-hidden">
+            {collapsed ? (
+              <Logo size="sm" showText={false} />
+            ) : (
+              <div className="flex items-center space-x-2">
+                <Logo size="sm" showText={false} />
+                <div className="leading-tight">
+                  <div className="flex items-center space-x-1.5">
+                    <span className="font-bold text-white tracking-tight text-sm">
+                      Chit<span className="text-indigo-400">Flow</span>
+                    </span>
+                    <span className="text-[9px] font-mono px-1 py-0.2 rounded bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
+                      PRO
+                    </span>
+                  </div>
+                  <span className="text-[8px] text-slate-400 block font-mono">
+                    Financial SaaS
+                  </span>
+                </div>
               </div>
             )}
           </div>

@@ -18,8 +18,72 @@ const loadInitialData = () => {
   const storedTransactions = storageService.get('transactions');
   const storedReceipts = storageService.get('receipts');
   const storedPayouts = storageService.get('payouts');
+  const storedNonAuctionPayments = storageService.get('nonAuctionPayments');
+  const storedGiftSchemes = storageService.get('giftSchemes');
   const storedNotifications = storageService.get('notifications');
   const storedSettings = storageService.get('settings');
+
+  // Seed default gift schemes and non-auction payments if empty
+  const defaultGiftSchemes = [
+    {
+      id: 'GFT-2026-001',
+      groupId: 'GRP-2026-001',
+      groupName: 'Diwali Special Chit 2026',
+      giftName: '1 Gram 916 Hallmark Gold Coin',
+      payable: 5000,
+      dateOfDisbursement: '2026-11-20',
+      createdAt: '2026-11-01T10:00:00Z',
+      subscribers: [
+        {
+          memberId: 'MEM-001',
+          memberName: 'K. Balasubramaniam',
+          mobile: '9842100001',
+          city: 'Coimbatore',
+          status: 'PAID',
+          paidDate: '2026-11-15',
+          paymentMethod: 'BANK_TRANSFER',
+          referenceNo: 'IMPS-992810',
+        },
+        {
+          memberId: 'MEM-002',
+          memberName: 'M. Senthil Kumar',
+          mobile: '9842100002',
+          city: 'Tiruppur',
+          status: 'PENDING',
+          paidDate: null,
+          paymentMethod: null,
+          referenceNo: null,
+        },
+        {
+          memberId: 'MEM-003',
+          memberName: 'R. Soundararajan',
+          mobile: '9842100003',
+          city: 'Erode',
+          status: 'PENDING',
+          paidDate: null,
+          paymentMethod: null,
+          referenceNo: null,
+        },
+      ],
+    },
+  ];
+
+  const defaultNonAuctionPayments = [
+    {
+      id: 'NAP-2026-001',
+      groupId: 'GRP-2026-001',
+      groupName: 'Diwali Special Chit 2026',
+      memberId: 'MEM-001',
+      receiverName: 'K. Balasubramaniam',
+      month: '2026-10',
+      grossChitAmt: 500000,
+      receiverAmt: 500000,
+      disbursementDate: '2026-10-25',
+      paymentMode: 'BANK_TRANSFER',
+      referenceNumber: 'NEFT-8831921',
+      createdAt: '2026-10-25T11:00:00Z',
+    },
+  ];
 
   if (storedGroups && storedMembers && storedInstallments) {
     return {
@@ -29,6 +93,8 @@ const loadInitialData = () => {
       transactions: storedTransactions || [],
       receipts: storedReceipts || [],
       payouts: storedPayouts || [],
+      nonAuctionPayments: storedNonAuctionPayments || defaultNonAuctionPayments,
+      giftSchemes: storedGiftSchemes || defaultGiftSchemes,
       notifications: storedNotifications || [],
       settings: storedSettings || initialSettings,
     };
@@ -43,6 +109,8 @@ const loadInitialData = () => {
     transactions: seed.transactions,
     receipts: seed.receipts,
     payouts: seed.payouts,
+    nonAuctionPayments: defaultNonAuctionPayments,
+    giftSchemes: defaultGiftSchemes,
     notifications: initialNotifications,
     settings: initialSettings,
   };
@@ -54,6 +122,8 @@ const loadInitialData = () => {
   storageService.set('transactions', init.transactions);
   storageService.set('receipts', init.receipts);
   storageService.set('payouts', init.payouts);
+  storageService.set('nonAuctionPayments', init.nonAuctionPayments);
+  storageService.set('giftSchemes', init.giftSchemes);
   storageService.set('notifications', init.notifications);
   storageService.set('settings', init.settings);
 
@@ -319,6 +389,55 @@ export const useAppStore = create((set, get) => ({
 
     set({ payouts: updatedPayouts });
     return newPayout;
+  },
+
+  // NON-AUCTION DISBURSEMENTS
+  addNonAuctionPayment: (paymentData) => {
+    const updated = [paymentData, ...(get().nonAuctionPayments || [])];
+    storageService.set('nonAuctionPayments', updated);
+    get().addNotification({
+      type: 'PAYMENT',
+      title: `Non-Auction Payout Disbursed: ₹${paymentData.receiverAmt.toLocaleString('en-IN')}`,
+      message: `${paymentData.receiverName} received maturity payment for ${paymentData.groupName}.`,
+      link: '/disbursements',
+    });
+    set({ nonAuctionPayments: updated });
+    return paymentData;
+  },
+
+  // GIFTS & PAYABLES
+  addGiftScheme: (schemeData) => {
+    const updated = [schemeData, ...(get().giftSchemes || [])];
+    storageService.set('giftSchemes', updated);
+    get().addNotification({
+      type: 'AUCTION',
+      title: `New Gift Scheme: ${schemeData.giftName}`,
+      message: `Established for ${schemeData.groupName} with ₹${schemeData.payable} payable.`,
+      link: '/gifts-payables',
+    });
+    set({ giftSchemes: updated });
+    return schemeData;
+  },
+
+  updateGiftSubscriberStatus: (schemeId, memberId, { paymentMethod, referenceNo, paidDate }) => {
+    const schemes = get().giftSchemes || [];
+    const updated = schemes.map((sch) => {
+      if (sch.id !== schemeId) return sch;
+      const updatedSubscribers = (sch.subscribers || []).map((sub) => {
+        if (sub.memberId !== memberId) return sub;
+        return {
+          ...sub,
+          status: 'PAID',
+          paidDate: paidDate || new Date().toISOString().split('T')[0],
+          paymentMethod,
+          referenceNo,
+        };
+      });
+      return { ...sch, subscribers: updatedSubscribers };
+    });
+
+    storageService.set('giftSchemes', updated);
+    set({ giftSchemes: updated });
   },
 
   // NOTIFICATIONS

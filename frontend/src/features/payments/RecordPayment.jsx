@@ -40,6 +40,7 @@ export const RecordPayment = () => {
   const [selectedGroupId, setSelectedGroupId] = useState(initialGroupId);
   const [selectedMemberId, setSelectedMemberId] = useState(initialMemberId);
   const [selectedInstallmentId, setSelectedInstallmentId] = useState(initialInstallmentId);
+  const [installmentFilter, setInstallmentFilter] = useState('ALL'); // 'ALL', 'OVERDUE', 'PENDING'
   const [completedReceipt, setCompletedReceipt] = useState(null);
 
   const {
@@ -73,11 +74,39 @@ export const RecordPayment = () => {
     ? members.filter((m) => m.assignedGroupIds?.includes(selectedGroupId))
     : members;
 
-  const memberInstallments = installments.filter((ins) => {
+  // Filter installments for the selected member/group with balance > 0
+  const currentMonthYearStr = new Date().toISOString().substring(0, 7); // 'YYYY-MM'
+
+  const rawMemberInstallments = installments.filter((ins) => {
     if (selectedGroupId && ins.groupId !== selectedGroupId) return false;
     if (selectedMemberId && ins.memberId !== selectedMemberId) return false;
     return ins.remainingAmount > 0;
   });
+
+  // Filter based on pending/overdue toggles
+  const memberInstallments = rawMemberInstallments.filter((ins) => {
+    if (installmentFilter === 'OVERDUE') return ins.status === 'OVERDUE';
+    if (installmentFilter === 'PENDING') return ins.status === 'PENDING' || ins.status === 'PARTIALLY_PAID';
+    return true;
+  });
+
+  // Auto-select current month or first pending installment as default when member changes
+  useEffect(() => {
+    if (selectedMemberId && !selectedInstallmentId && rawMemberInstallments.length > 0) {
+      // Find current month's installment
+      const currentMonthIns = rawMemberInstallments.find((ins) => {
+        const insMonth = ins.dueDate?.substring(0, 7);
+        return insMonth === currentMonthYearStr;
+      });
+
+      const defaultIns = currentMonthIns || rawMemberInstallments[0];
+      if (defaultIns) {
+        setSelectedInstallmentId(defaultIns.id);
+        setValue('installmentId', defaultIns.id);
+        setValue('amount', defaultIns.remainingAmount);
+      }
+    }
+  }, [selectedMemberId, rawMemberInstallments, selectedInstallmentId, currentMonthYearStr, setValue]);
 
   const activeInstallment = installments.find((ins) => ins.id === selectedInstallmentId);
 
@@ -108,9 +137,9 @@ export const RecordPayment = () => {
     }
   };
 
-  const handleDownloadPDF = (receipt) => {
-    receiptService.downloadReceiptPDF(receipt, settings);
-    toast.success('Official PDF voucher downloaded.');
+  const handleDownloadPDF = (receipt, format = 'standard') => {
+    receiptService.downloadReceiptPDF(receipt, settings, format);
+    toast.success(`Official PDF voucher downloaded (${format.toUpperCase()}).`);
   };
 
   const handleRecordAnother = () => {
@@ -190,24 +219,38 @@ export const RecordPayment = () => {
             </div>
           </div>
 
-          <div className="mt-6 flex flex-col sm:flex-row items-center justify-center gap-2.5">
+          <div className="mt-6 flex flex-wrap items-center justify-center gap-2.5">
             <button
-              onClick={() => handleDownloadPDF(completedReceipt)}
-              className="w-full sm:w-auto px-4 py-2 text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-700 rounded-md shadow-xs flex items-center justify-center gap-1.5"
+              onClick={() => handleDownloadPDF(completedReceipt, 'standard')}
+              className="px-3.5 py-2 text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-700 rounded-md shadow-xs flex items-center justify-center gap-1.5"
             >
               <Download className="w-3.5 h-3.5" />
-              <span>Download Official PDF</span>
+              <span>A5 Receipt</span>
+            </button>
+            <button
+              onClick={() => handleDownloadPDF(completedReceipt, '3inch')}
+              className="px-3.5 py-2 text-xs font-semibold text-indigo-700 dark:text-indigo-300 bg-indigo-50 dark:bg-indigo-950/50 border border-indigo-200 dark:border-indigo-800 hover:bg-indigo-100 rounded-md flex items-center justify-center gap-1.5"
+            >
+              <Printer className="w-3.5 h-3.5" />
+              <span>3" Thermal POS</span>
+            </button>
+            <button
+              onClick={() => handleDownloadPDF(completedReceipt, '2inch')}
+              className="px-3.5 py-2 text-xs font-semibold text-indigo-700 dark:text-indigo-300 bg-indigo-50 dark:bg-indigo-950/50 border border-indigo-200 dark:border-indigo-800 hover:bg-indigo-100 rounded-md flex items-center justify-center gap-1.5"
+            >
+              <Printer className="w-3.5 h-3.5" />
+              <span>2" Thermal POS</span>
             </button>
             <button
               onClick={() => navigate(`/receipts?receiptNumber=${completedReceipt.receiptNumber}`)}
-              className="w-full sm:w-auto px-4 py-2 text-xs font-medium text-slate-700 dark:text-slate-300 bg-white dark:bg-[#182032] border border-[#e2e4e9] dark:border-[#1e283d] rounded-md hover:bg-slate-50 flex items-center justify-center gap-1.5"
+              className="px-3.5 py-2 text-xs font-medium text-slate-700 dark:text-slate-300 bg-white dark:bg-[#182032] border border-[#e2e4e9] dark:border-[#1e283d] rounded-md hover:bg-slate-50 flex items-center justify-center gap-1.5"
             >
               <ReceiptIcon className="w-3.5 h-3.5 text-slate-400" />
               <span>View in Receipts</span>
             </button>
             <button
               onClick={handleRecordAnother}
-              className="w-full sm:w-auto px-4 py-2 text-xs font-medium text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 rounded-md"
+              className="px-3.5 py-2 text-xs font-medium text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 rounded-md"
             >
               Record Another
             </button>
@@ -270,9 +313,48 @@ export const RecordPayment = () => {
               </div>
 
               <div>
-                <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">
-                  3. Select Pending Installment Cycle *
-                </label>
+                <div className="flex items-center justify-between mb-1">
+                  <label className="font-semibold text-slate-700 dark:text-slate-300">
+                    3. Select Pending Installment Cycle *
+                  </label>
+                  {/* Quick Filters for Pending / Overdue */}
+                  <div className="flex items-center space-x-1">
+                    <button
+                      type="button"
+                      onClick={() => setInstallmentFilter('ALL')}
+                      className={`px-2 py-0.5 rounded text-[10px] font-medium transition-colors ${
+                        installmentFilter === 'ALL'
+                          ? 'bg-indigo-600 text-white'
+                          : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200'
+                      }`}
+                    >
+                      All ({rawMemberInstallments.length})
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setInstallmentFilter('OVERDUE')}
+                      className={`px-2 py-0.5 rounded text-[10px] font-medium transition-colors ${
+                        installmentFilter === 'OVERDUE'
+                          ? 'bg-rose-600 text-white font-semibold'
+                          : 'bg-rose-50 dark:bg-rose-950/40 text-rose-600 dark:text-rose-400 hover:bg-rose-100'
+                      }`}
+                    >
+                      Overdue ({rawMemberInstallments.filter((i) => i.status === 'OVERDUE').length})
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setInstallmentFilter('PENDING')}
+                      className={`px-2 py-0.5 rounded text-[10px] font-medium transition-colors ${
+                        installmentFilter === 'PENDING'
+                          ? 'bg-amber-600 text-white font-semibold'
+                          : 'bg-amber-50 dark:bg-amber-950/40 text-amber-600 dark:text-amber-400 hover:bg-amber-100'
+                      }`}
+                    >
+                      Pending ({rawMemberInstallments.filter((i) => i.status === 'PENDING' || i.status === 'PARTIALLY_PAID').length})
+                    </button>
+                  </div>
+                </div>
+
                 <select
                   value={selectedInstallmentId}
                   disabled={!selectedMemberId}
@@ -283,19 +365,26 @@ export const RecordPayment = () => {
                   className="w-full px-3 py-1.5 bg-slate-50 dark:bg-[#182032] border border-[#e2e4e9] dark:border-[#1e283d] rounded-md text-slate-900 dark:text-white disabled:opacity-50"
                 >
                   <option value="">-- Choose Installment Schedule --</option>
-                  {memberInstallments.map((ins) => (
-                    <option key={ins.id} value={ins.id}>
-                      Month #{ins.installmentNumber} (Due: {formatDate(ins.dueDate)}) — Balance: ₹
-                      {ins.remainingAmount.toLocaleString('en-IN')} [{ins.status}]
-                    </option>
-                  ))}
+                  {memberInstallments.map((ins) => {
+                    const isCurMonth = ins.dueDate?.substring(0, 7) === currentMonthYearStr;
+                    return (
+                      <option key={ins.id} value={ins.id}>
+                        {isCurMonth ? '★ CURRENT MONTH - ' : ''}Month #{ins.installmentNumber} (Due: {formatDate(ins.dueDate)}) — Balance: ₹{ins.remainingAmount.toLocaleString('en-IN')} [{ins.status}]
+                      </option>
+                    );
+                  })}
                 </select>
                 {errors.installmentId && (
                   <p className="text-rose-500 mt-1">{errors.installmentId.message}</p>
                 )}
-                {selectedMemberId && memberInstallments.length === 0 && (
+                {selectedMemberId && rawMemberInstallments.length === 0 && (
                   <p className="text-emerald-600 mt-1 font-medium">
                     All installments for this subscriber are fully settled!
+                  </p>
+                )}
+                {selectedMemberId && rawMemberInstallments.length > 0 && memberInstallments.length === 0 && (
+                  <p className="text-slate-500 mt-1 font-medium">
+                    No installments matching the selected filter ({installmentFilter}).
                   </p>
                 )}
               </div>

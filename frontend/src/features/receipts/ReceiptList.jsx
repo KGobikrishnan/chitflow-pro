@@ -47,9 +47,9 @@ export const ReceiptList = () => {
     return true;
   });
 
-  const handleDownloadPDF = (receipt) => {
-    receiptService.downloadReceiptPDF(receipt, settings);
-    toast.success(`PDF downloaded for receipt ${receipt.receiptNumber}`);
+  const handleDownloadPDF = (receipt, format = 'standard') => {
+    receiptService.downloadReceiptPDF(receipt, settings, format);
+    toast.success(`Receipt downloaded (${format.toUpperCase()}) for ${receipt.receiptNumber}`);
   };
 
   const handlePrint = () => {
@@ -214,13 +214,29 @@ export const ReceiptList = () => {
                   <Printer className="w-3.5 h-3.5" />
                   <span>Print</span>
                 </button>
-                <button
-                  onClick={() => handleDownloadPDF(activeReceiptModal)}
-                  className="px-2.5 py-1 text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-700 rounded flex items-center gap-1"
-                >
-                  <Download className="w-3.5 h-3.5" />
-                  <span>PDF</span>
-                </button>
+                <div className="flex items-center rounded-md bg-indigo-50 dark:bg-indigo-950/40 border border-indigo-200 dark:border-indigo-800 p-0.5">
+                  <button
+                    onClick={() => handleDownloadPDF(activeReceiptModal, 'standard')}
+                    className="px-2 py-0.5 text-[11px] font-semibold text-indigo-700 dark:text-indigo-300 hover:bg-indigo-100 dark:hover:bg-indigo-900/60 rounded"
+                    title="A5 Standard Voucher"
+                  >
+                    A5 PDF
+                  </button>
+                  <button
+                    onClick={() => handleDownloadPDF(activeReceiptModal, '3inch')}
+                    className="px-2 py-0.5 text-[11px] font-semibold text-indigo-700 dark:text-indigo-300 hover:bg-indigo-100 dark:hover:bg-indigo-900/60 rounded"
+                    title="3 inch (80mm) Thermal POS Printer Slip"
+                  >
+                    3" Thermal
+                  </button>
+                  <button
+                    onClick={() => handleDownloadPDF(activeReceiptModal, '2inch')}
+                    className="px-2 py-0.5 text-[11px] font-semibold text-indigo-700 dark:text-indigo-300 hover:bg-indigo-100 dark:hover:bg-indigo-900/60 rounded"
+                    title="2 inch (58mm) Thermal POS Printer Slip"
+                  >
+                    2" Thermal
+                  </button>
+                </div>
                 <button
                   onClick={() => setActiveReceiptModal(null)}
                   className="p-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"

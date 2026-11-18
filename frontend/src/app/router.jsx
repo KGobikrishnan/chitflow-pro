@@ -9,6 +9,8 @@ import { MemberProfile } from '../features/members/MemberProfile';
 import { CollectionCalendar } from '../features/collections/CollectionCalendar';
 import { RecordPayment } from '../features/payments/RecordPayment';
 import { PayoutList } from '../features/payouts/PayoutList';
+import { NonAuctionDisbursements } from '../features/payouts/NonAuctionDisbursements';
+import { GiftsAndPayables } from '../features/payouts/GiftsAndPayables';
 import { ReceiptList } from '../features/receipts/ReceiptList';
 import { ReportsDashboard } from '../features/reports/ReportsDashboard';
 import { NotificationCenter } from '../features/notifications/NotificationCenter';
@@ -26,6 +28,8 @@ export const router = createBrowserRouter([
       { path: 'members/:id', element: <MemberProfile /> },
       { path: 'collections', element: <CollectionCalendar /> },
       { path: 'payments', element: <RecordPayment /> },
+      { path: 'disbursements', element: <NonAuctionDisbursements /> },
+      { path: 'gifts-payables', element: <GiftsAndPayables /> },
       { path: 'payouts', element: <PayoutList /> },
       { path: 'receipts', element: <ReceiptList /> },
       { path: 'reports', element: <ReportsDashboard /> },
