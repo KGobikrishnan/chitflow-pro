@@ -1,6 +1,4 @@
 import React, { useState } from 'react';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
 import {
   X,
   Layers,
@@ -11,15 +9,55 @@ import {
   IndianRupee,
   Gift,
   ArrowRight,
+  ArrowUpRight,
+  Trophy,
+  Plus,
+  Trash2,
 } from 'lucide-react';
 import { toast } from 'sonner';
-import { chitGroupSchema } from '../../utils/validators';
 import { useAppStore } from '../../store/useAppStore';
 import { calculateEndDate } from '../../utils/date';
 
+/**
+ * Distribution Categories:
+ * - NON_AUCTION: Non-Auction Payment (Maturity / Fixed Return)
+ * - GIFT_PAYABLE: Gift & Payable (Gifts + Cash breakdown)
+ * - AUCTION_PAYOUT: Auction & Payouts (Auction Bidding & Dividends)
+ */
 export const CreateGroupModal = ({ isOpen, onClose }) => {
   const addGroup = useAppStore((state) => state.addGroup);
+
+  // 1. Distribution Category Selection (Top Step)
+  const [distributionCategory, setDistributionCategory] = useState('AUCTION_PAYOUT'); // 'NON_AUCTION' | 'GIFT_PAYABLE' | 'AUCTION_PAYOUT'
+
+  // 2. Plan Architecture
   const [selectedPlanType, setSelectedPlanType] = useState('STANDARD'); // 'STANDARD' | 'MONTHLY_DIFFERENT'
+
+  // Dynamic Gift Items for GIFT_PAYABLE category
+  const [giftItems, setGiftItems] = useState([
+    { id: '1', title: '1 Gram 916 Hallmark Gold Coin', extraCash: 0 },
+  ]);
+
+  const handleAddGiftItem = () => {
+    setGiftItems((prev) => [
+      ...prev,
+      { id: String(Date.now()), title: '', extraCash: 0 },
+    ]);
+  };
+
+  const handleRemoveGiftItem = (id) => {
+    if (giftItems.length <= 1) {
+      toast.error('At least one gift item is required for Gift & Payable scheme');
+      return;
+    }
+    setGiftItems((prev) => prev.filter((item) => item.id !== id));
+  };
+
+  const handleGiftItemChange = (id, field, value) => {
+    setGiftItems((prev) =>
+      prev.map((item) => (item.id === id ? { ...item, [field]: value } : item))
+    );
+  };
 
   if (!isOpen) return null;
 
@@ -34,7 +72,7 @@ export const CreateGroupModal = ({ isOpen, onClose }) => {
               <span>Create New Chit Circle Scheme</span>
             </h3>
             <p className="text-xs text-slate-500">
-              Select scheme architecture: Standard Fixed Plan or Variable Auction Circle
+              Configure distribution category, returns architecture, and tenure rules
             </p>
           </div>
           <button onClick={onClose} className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">
@@ -42,80 +80,248 @@ export const CreateGroupModal = ({ isOpen, onClose }) => {
           </button>
         </div>
 
-        {/* Plan Type Selector Tabs */}
-        <div className="grid grid-cols-2 gap-3 mt-4">
-          <button
-            type="button"
-            onClick={() => setSelectedPlanType('STANDARD')}
-            className={`p-3 rounded-lg border text-left transition-all relative flex flex-col justify-between ${
-              selectedPlanType === 'STANDARD'
-                ? 'border-indigo-600 bg-indigo-50/70 dark:bg-indigo-950/40 ring-1 ring-indigo-600'
-                : 'border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-[#151c2e]'
-            }`}
-          >
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-2">
-                <div
-                  className={`w-6 h-6 rounded flex items-center justify-center ${
-                    selectedPlanType === 'STANDARD'
-                      ? 'bg-indigo-600 text-white'
-                      : 'bg-slate-100 dark:bg-slate-800 text-slate-600'
-                  }`}
-                >
-                  <Gift className="w-3.5 h-3.5" />
+        {/* STEP 1: Chit Category / Distribution Type Selection */}
+        <div className="mt-4">
+          <label className="block text-xs font-bold text-slate-800 dark:text-slate-200 mb-1.5 uppercase font-mono tracking-wider">
+            Step 1: Chit Category / Distribution Type *
+          </label>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+            {/* Auction & Payouts */}
+            <button
+              type="button"
+              onClick={() => setDistributionCategory('AUCTION_PAYOUT')}
+              className={`p-2.5 rounded-lg border text-left transition-all flex flex-col justify-between ${
+                distributionCategory === 'AUCTION_PAYOUT'
+                  ? 'border-purple-600 bg-purple-50/70 dark:bg-purple-950/40 ring-1 ring-purple-600'
+                  : 'border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-[#151c2e]'
+              }`}
+            >
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-1.5">
+                  <Trophy className="w-4 h-4 text-purple-600" />
+                  <span className="font-bold text-xs text-slate-900 dark:text-white">Auction & Payouts</span>
                 </div>
-                <span className="font-bold text-xs text-slate-900 dark:text-white">Standard Chit Plan</span>
+                {distributionCategory === 'AUCTION_PAYOUT' && (
+                  <span className="w-3.5 h-3.5 rounded-full bg-purple-600 text-white flex items-center justify-center text-[9px]">
+                    ✓
+                  </span>
+                )}
               </div>
-              {selectedPlanType === 'STANDARD' && (
-                <span className="w-4 h-4 rounded-full bg-indigo-600 text-white flex items-center justify-center text-[10px]">
-                  ✓
-                </span>
-              )}
-            </div>
-            <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-2">
-              Fixed monthly contribution. Ideal for traditional savings with <span className="font-semibold text-indigo-600">Gifts & Payables</span> module.
-            </p>
-          </button>
+              <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-1.5">
+                Monthly auction bidding, foreman commission, and member dividend payouts.
+              </p>
+            </button>
 
-          <button
-            type="button"
-            onClick={() => setSelectedPlanType('MONTHLY_DIFFERENT')}
-            className={`p-3 rounded-lg border text-left transition-all relative flex flex-col justify-between ${
-              selectedPlanType === 'MONTHLY_DIFFERENT'
-                ? 'border-purple-600 bg-purple-50/70 dark:bg-purple-950/40 ring-1 ring-purple-600'
-                : 'border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-[#151c2e]'
-            }`}
-          >
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-2">
-                <div
-                  className={`w-6 h-6 rounded flex items-center justify-center ${
-                    selectedPlanType === 'MONTHLY_DIFFERENT'
-                      ? 'bg-purple-600 text-white'
-                      : 'bg-slate-100 dark:bg-slate-800 text-slate-600'
-                  }`}
-                >
-                  <Sparkles className="w-3.5 h-3.5" />
+            {/* Gift & Payable */}
+            <button
+              type="button"
+              onClick={() => setDistributionCategory('GIFT_PAYABLE')}
+              className={`p-2.5 rounded-lg border text-left transition-all flex flex-col justify-between ${
+                distributionCategory === 'GIFT_PAYABLE'
+                  ? 'border-amber-600 bg-amber-50/70 dark:bg-amber-950/40 ring-1 ring-amber-600'
+                  : 'border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-[#151c2e]'
+              }`}
+            >
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-1.5">
+                  <Gift className="w-4 h-4 text-amber-600" />
+                  <span className="font-bold text-xs text-slate-900 dark:text-white">Gift & Payable</span>
                 </div>
-                <span className="font-bold text-xs text-slate-900 dark:text-white">Monthly Different Plan</span>
+                {distributionCategory === 'GIFT_PAYABLE' && (
+                  <span className="w-3.5 h-3.5 rounded-full bg-amber-600 text-white flex items-center justify-center text-[9px]">
+                    ✓
+                  </span>
+                )}
               </div>
-              {selectedPlanType === 'MONTHLY_DIFFERENT' && (
-                <span className="w-4 h-4 rounded-full bg-purple-600 text-white flex items-center justify-center text-[10px]">
-                  ✓
-                </span>
-              )}
-            </div>
-            <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-2">
-              Variable monthly dues schedule with full <span className="font-semibold text-purple-600">Auction & Payouts</span> dividend calendar.
-            </p>
-          </button>
+              <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-1.5">
+                Festival gifts (gold, silver, articles) + extra payable cash disbursements.
+              </p>
+            </button>
+
+            {/* Non-auction Payment */}
+            <button
+              type="button"
+              onClick={() => setDistributionCategory('NON_AUCTION')}
+              className={`p-2.5 rounded-lg border text-left transition-all flex flex-col justify-between ${
+                distributionCategory === 'NON_AUCTION'
+                  ? 'border-indigo-600 bg-indigo-50/70 dark:bg-indigo-950/40 ring-1 ring-indigo-600'
+                  : 'border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-[#151c2e]'
+              }`}
+            >
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-1.5">
+                  <ArrowUpRight className="w-4 h-4 text-indigo-600" />
+                  <span className="font-bold text-xs text-slate-900 dark:text-white">Non-auction Payment</span>
+                </div>
+                {distributionCategory === 'NON_AUCTION' && (
+                  <span className="w-3.5 h-3.5 rounded-full bg-indigo-600 text-white flex items-center justify-center text-[9px]">
+                    ✓
+                  </span>
+                )}
+              </div>
+              <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-1.5">
+                Full maturity return or structured fixed payout without auction discount.
+              </p>
+            </button>
+          </div>
         </div>
 
-        {/* Form Body Based on Plan Type */}
+        {/* DYNAMIC GIFT DETAILS SECTION (Only when Category is Gift & Payable) */}
+        {distributionCategory === 'GIFT_PAYABLE' && (
+          <div className="mt-4 p-3.5 bg-amber-50/60 dark:bg-amber-950/30 rounded-lg border border-amber-200 dark:border-amber-900/50 animate-in fade-in">
+            <div className="flex items-center justify-between mb-2">
+              <div className="flex items-center space-x-1.5">
+                <Gift className="w-4 h-4 text-amber-600" />
+                <span className="font-bold text-xs text-amber-950 dark:text-amber-200">
+                  Gift & Cash Breakdown Allocation
+                </span>
+              </div>
+              <button
+                type="button"
+                onClick={handleAddGiftItem}
+                className="px-2 py-1 text-[11px] font-semibold text-amber-800 dark:text-amber-200 bg-amber-100 dark:bg-amber-900/60 hover:bg-amber-200 rounded flex items-center gap-1 transition-colors"
+              >
+                <Plus className="w-3 h-3" />
+                <span>Add Item</span>
+              </button>
+            </div>
+            <p className="text-[11px] text-slate-600 dark:text-slate-400 mb-3">
+              Define the gifts (e.g. 1 gram gold, silver lamp) and extra cash amounts allocated to subscribers under this circle:
+            </p>
+
+            <div className="space-y-2">
+              {giftItems.map((item, idx) => (
+                <div
+                  key={item.id}
+                  className="flex items-center gap-2 p-2 bg-white dark:bg-[#182032] rounded-md border border-amber-200 dark:border-amber-900/50 text-xs"
+                >
+                  <span className="font-mono text-[11px] font-bold text-amber-700 dark:text-amber-300 w-14 shrink-0">
+                    Gift #{idx + 1}
+                  </span>
+                  <input
+                    type="text"
+                    required
+                    placeholder="e.g. 1 Gram 916 Gold Coin / Festival Hamper"
+                    value={item.title}
+                    onChange={(e) => handleGiftItemChange(item.id, 'title', e.target.value)}
+                    className="flex-1 px-2.5 py-1 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded text-slate-900 dark:text-white"
+                  />
+                  <div className="flex items-center gap-1 w-36 shrink-0">
+                    <span className="text-slate-400 font-mono text-[11px]">Extra ₹</span>
+                    <input
+                      type="number"
+                      min="0"
+                      placeholder="Cash (e.g. 5000)"
+                      value={item.extraCash}
+                      onChange={(e) => handleGiftItemChange(item.id, 'extraCash', Number(e.target.value))}
+                      className="w-full px-2 py-1 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded text-slate-900 dark:text-white font-mono"
+                    />
+                  </div>
+                  {giftItems.length > 1 && (
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveGiftItem(item.id)}
+                      className="p-1 text-slate-400 hover:text-rose-600 shrink-0"
+                      title="Remove Item"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </button>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* STEP 2: Plan Type Selector Tabs */}
+        <div className="mt-4">
+          <label className="block text-xs font-bold text-slate-800 dark:text-slate-200 mb-1.5 uppercase font-mono tracking-wider">
+            Step 2: Installment Plan Architecture *
+          </label>
+          <div className="grid grid-cols-2 gap-3">
+            <button
+              type="button"
+              onClick={() => setSelectedPlanType('STANDARD')}
+              className={`p-3 rounded-lg border text-left transition-all relative flex flex-col justify-between ${
+                selectedPlanType === 'STANDARD'
+                  ? 'border-indigo-600 bg-indigo-50/70 dark:bg-indigo-950/40 ring-1 ring-indigo-600'
+                  : 'border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-[#151c2e]'
+              }`}
+            >
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-2">
+                  <div
+                    className={`w-6 h-6 rounded flex items-center justify-center ${
+                      selectedPlanType === 'STANDARD'
+                        ? 'bg-indigo-600 text-white'
+                        : 'bg-slate-100 dark:bg-slate-800 text-slate-600'
+                    }`}
+                  >
+                    <Layers className="w-3.5 h-3.5" />
+                  </div>
+                  <span className="font-bold text-xs text-slate-900 dark:text-white">Standard Chit Plan</span>
+                </div>
+                {selectedPlanType === 'STANDARD' && (
+                  <span className="w-4 h-4 rounded-full bg-indigo-600 text-white flex items-center justify-center text-[10px]">
+                    ✓
+                  </span>
+                )}
+              </div>
+              <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-2">
+                Fixed monthly contribution target across all tenure cycles.
+              </p>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setSelectedPlanType('MONTHLY_DIFFERENT')}
+              className={`p-3 rounded-lg border text-left transition-all relative flex flex-col justify-between ${
+                selectedPlanType === 'MONTHLY_DIFFERENT'
+                  ? 'border-purple-600 bg-purple-50/70 dark:bg-purple-950/40 ring-1 ring-purple-600'
+                  : 'border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-[#151c2e]'
+              }`}
+            >
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-2">
+                  <div
+                    className={`w-6 h-6 rounded flex items-center justify-center ${
+                      selectedPlanType === 'MONTHLY_DIFFERENT'
+                        ? 'bg-purple-600 text-white'
+                        : 'bg-slate-100 dark:bg-slate-800 text-slate-600'
+                    }`}
+                  >
+                    <Sparkles className="w-3.5 h-3.5" />
+                  </div>
+                  <span className="font-bold text-xs text-slate-900 dark:text-white">Monthly Different Plan</span>
+                </div>
+                {selectedPlanType === 'MONTHLY_DIFFERENT' && (
+                  <span className="w-4 h-4 rounded-full bg-purple-600 text-white flex items-center justify-center text-[10px]">
+                    ✓
+                  </span>
+                )}
+              </div>
+              <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-2">
+                Custom individual contribution and payable amount per monthly cycle without auto-calc overwrites.
+              </p>
+            </button>
+          </div>
+        </div>
+
+        {/* STEP 3: Form Body Based on Plan Type */}
         {selectedPlanType === 'STANDARD' ? (
-          <StandardPlanForm addGroup={addGroup} onClose={onClose} />
+          <StandardPlanForm
+            addGroup={addGroup}
+            distributionCategory={distributionCategory}
+            giftItems={giftItems}
+            onClose={onClose}
+          />
         ) : (
-          <MonthlyDifferentPlanForm addGroup={addGroup} onClose={onClose} />
+          <MonthlyDifferentPlanForm
+            addGroup={addGroup}
+            distributionCategory={distributionCategory}
+            giftItems={giftItems}
+            onClose={onClose}
+          />
         )}
       </div>
     </div>
@@ -124,18 +330,8 @@ export const CreateGroupModal = ({ isOpen, onClose }) => {
 
 /**
  * 1. Standard Chit Plan Form
- * Fields:
- * 1. Chit Name
- * 2. Monthly Contribution
- * 3. Duration
- * 4. Total Chit: (Monthly Cons * Duration)
- * 5. Target Capacity: Default "Nil" (or numeric input)
- * 6. Start Date
- * 7. Monthly Due Day
- * 8. Grace Period
- * 9. Desc
  */
-const StandardPlanForm = ({ addGroup, onClose }) => {
+const StandardPlanForm = ({ addGroup, distributionCategory, giftItems, onClose }) => {
   const [chitName, setChitName] = useState('');
   const [monthlyContribution, setMonthlyContribution] = useState(10000);
   const [duration, setDuration] = useState(20);
@@ -160,6 +356,8 @@ const StandardPlanForm = ({ addGroup, onClose }) => {
       const created = addGroup({
         name: chitName,
         planType: 'STANDARD',
+        distributionCategory,
+        giftItems: distributionCategory === 'GIFT_PAYABLE' ? giftItems : [],
         monthlyContribution: Number(monthlyContribution),
         durationMonths: Number(duration),
         chitValue: totalChitValue,
@@ -168,7 +366,7 @@ const StandardPlanForm = ({ addGroup, onClose }) => {
         startDate,
         collectionDueDate: Number(monthlyDueDay),
         gracePeriodDays: Number(gracePeriod),
-        description: description || 'Standard Chit Scheme with Gifts & Payables allocation',
+        description: description || `Standard Chit Scheme under ${distributionCategory} allocation`,
         status: 'ACTIVE',
       });
       toast.success(`Standard Chit Plan "${created.name}" created successfully!`);
@@ -225,7 +423,7 @@ const StandardPlanForm = ({ addGroup, onClose }) => {
         </div>
       </div>
 
-      {/* Auto Calculated Total Chit Banner */}
+      {/* Total Chit Banner */}
       <div className="p-3 bg-indigo-50/70 dark:bg-indigo-950/40 rounded-lg border border-indigo-200 dark:border-indigo-900/50 flex items-center justify-between">
         <div>
           <span className="text-[11px] text-indigo-700 dark:text-indigo-400 font-medium">
@@ -310,7 +508,7 @@ const StandardPlanForm = ({ addGroup, onClose }) => {
         </label>
         <textarea
           rows="2"
-          placeholder="Details on gold coin, festival gift, or maturity payout vouchers..."
+          placeholder="Details on distribution, maturity payout, or circle notes..."
           value={description}
           onChange={(e) => setDescription(e.target.value)}
           className="w-full px-3 py-1.5 bg-slate-50 dark:bg-[#182032] border border-[#e2e4e9] dark:border-[#1e283d] rounded-md text-slate-900 dark:text-white resize-none"
@@ -329,7 +527,7 @@ const StandardPlanForm = ({ addGroup, onClose }) => {
           type="submit"
           className="px-4 py-1.5 font-semibold text-white bg-indigo-600 hover:bg-indigo-700 rounded-md shadow-xs flex items-center gap-1.5"
         >
-          <Gift className="w-3.5 h-3.5" />
+          <Check className="w-3.5 h-3.5" />
           <span>Create Standard Plan</span>
         </button>
       </div>
@@ -339,60 +537,42 @@ const StandardPlanForm = ({ addGroup, onClose }) => {
 
 /**
  * 2. Monthly Different Chit Plan Form
- * Fields:
- * 1. Chit Name
- * 2. Start Month (e.g. 2026-11)
- * 3. Duration
- * 4. Chit Calendar (Month auto display based on Start Month | Monthly Contribution | Amt need to Pay)
- * 5. Target Capacity
- * 6. Monthly Due
- * 7. Grace Period
- * 8. Amt Distribution Date
+ * Per user instructions:
+ * - Removed 'Base Monthly' & Auto-Calculation completely!
+ * - Start Month and Duration only.
+ * - In Chit Calendar table: Month (auto display based on Start Month) | Monthly Contribution | Amt need to Pay.
+ * - Editing one value DOES NOT calculate or overwrite any other amount.
  */
-const MonthlyDifferentPlanForm = ({ addGroup, onClose }) => {
+const MonthlyDifferentPlanForm = ({ addGroup, distributionCategory, giftItems, onClose }) => {
   const [chitName, setChitName] = useState('');
   const [startMonth, setStartMonth] = useState(new Date().toISOString().substring(0, 7)); // 'YYYY-MM'
   const [duration, setDuration] = useState(12);
-  const [baseContribution, setBaseContribution] = useState(25000);
   const [targetCapacity, setTargetCapacity] = useState(20);
   const [monthlyDueDay, setMonthlyDueDay] = useState(10);
   const [gracePeriod, setGracePeriod] = useState(5);
-  const [distributionDate, setDistributionDate] = useState(15); // Date of the month when prize pool is distributed
+  const [distributionDate, setDistributionDate] = useState(15);
 
-  // Build dynamic Chit Calendar schedule based on Start Month and Duration
+  // Dynamic Chit Calendar schedule based on Start Month and Duration without auto-overwrites
   const [calendarRows, setCalendarRows] = useState(() => {
-    return generateCalendarSchedule(startMonth, duration, baseContribution);
+    return generateCalendarSchedule(startMonth, duration);
   });
 
-  // Re-generate or update rows when startMonth or duration or baseContribution changes
-  const handleRegenerateCalendar = (newStartMonth, newDuration, newBase) => {
-    setCalendarRows(generateCalendarSchedule(newStartMonth, newDuration, newBase));
-  };
-
-  const handleRowChange = (index, field, value) => {
-    const updated = [...calendarRows];
-    updated[index][field] = Number(value);
-    setCalendarRows(updated);
-  };
-
-  function generateCalendarSchedule(stMonth, dur, base) {
+  function generateCalendarSchedule(stMonth, dur, existingRows = []) {
     const rows = [];
     const [yearStr, monthStr] = stMonth.split('-');
     let currYear = parseInt(yearStr, 10);
-    let currMonth = parseInt(monthStr, 10); // 1-12
+    let currMonth = parseInt(monthStr, 10);
 
     for (let i = 0; i < dur; i++) {
       const monthDisplay = `${currYear}-${String(currMonth).padStart(2, '0')}`;
-      // In auction chits, early months usually have higher dividends, so Amt Need to Pay is lower
-      // Month 1 has no auction dividend (full amount), then progressive
-      const estimatedDividend = i === 0 ? 0 : Math.round(base * 0.15);
-      const amtNeedToPay = Math.max(0, base - estimatedDividend);
+      const existing = existingRows[i];
 
       rows.push({
         monthIndex: i + 1,
         monthName: monthDisplay,
-        monthlyContribution: base,
-        amtNeedToPay: amtNeedToPay,
+        // Keep user entered values if existing, otherwise blank/zero for user to enter
+        monthlyContribution: existing ? existing.monthlyContribution : '',
+        amtNeedToPay: existing ? existing.amtNeedToPay : '',
       });
 
       currMonth++;
@@ -404,7 +584,31 @@ const MonthlyDifferentPlanForm = ({ addGroup, onClose }) => {
     return rows;
   }
 
-  const totalGrossChit = calendarRows.reduce((sum, r) => sum + Number(r.monthlyContribution || 0), 0) * (Number(targetCapacity) || 1);
+  // Handle month or duration changes while preserving existing inputs where possible
+  const handleStartMonthChange = (newStartMonth) => {
+    setStartMonth(newStartMonth);
+    setCalendarRows(generateCalendarSchedule(newStartMonth, duration, calendarRows));
+  };
+
+  const handleDurationChange = (newDur) => {
+    setDuration(newDur);
+    setCalendarRows(generateCalendarSchedule(startMonth, newDur, calendarRows));
+  };
+
+  // Pure independent update without any auto-calculation or overwrites
+  const handleRowChange = (index, field, value) => {
+    const updated = [...calendarRows];
+    updated[index] = {
+      ...updated[index],
+      [field]: value === '' ? '' : Number(value),
+    };
+    setCalendarRows(updated);
+  };
+
+  const totalCalculatedPool = calendarRows.reduce(
+    (sum, r) => sum + (Number(r.monthlyContribution) || 0),
+    0
+  ) * (Number(targetCapacity) || 1);
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -417,7 +621,9 @@ const MonthlyDifferentPlanForm = ({ addGroup, onClose }) => {
       const created = addGroup({
         name: chitName,
         planType: 'MONTHLY_DIFFERENT',
-        chitValue: totalGrossChit || Number(baseContribution) * Number(duration) * Number(targetCapacity),
+        distributionCategory,
+        giftItems: distributionCategory === 'GIFT_PAYABLE' ? giftItems : [],
+        chitValue: totalCalculatedPool || 500000,
         memberCount: Number(targetCapacity),
         durationMonths: Number(duration),
         startDate: `${startMonth}-01`,
@@ -425,8 +631,12 @@ const MonthlyDifferentPlanForm = ({ addGroup, onClose }) => {
         collectionDueDate: Number(monthlyDueDay),
         gracePeriodDays: Number(gracePeriod),
         distributionDate: Number(distributionDate),
-        calendarSchedule: calendarRows,
-        description: 'Monthly Different Variable Auction Plan with Scheduled Calendar',
+        calendarSchedule: calendarRows.map((r) => ({
+          ...r,
+          monthlyContribution: Number(r.monthlyContribution) || 0,
+          amtNeedToPay: Number(r.amtNeedToPay) || 0,
+        })),
+        description: `Monthly Different Plan under ${distributionCategory} allocation`,
         status: 'ACTIVE',
       });
       toast.success(`Monthly Variable Chit "${created.name}" created!`);
@@ -445,14 +655,14 @@ const MonthlyDifferentPlanForm = ({ addGroup, onClose }) => {
         <input
           type="text"
           required
-          placeholder="e.g. Coimbatore Textile Circle (Auction 2026-27)"
+          placeholder="e.g. Coimbatore Textile Circle (Variable Schedule 2026-27)"
           value={chitName}
           onChange={(e) => setChitName(e.target.value)}
           className="w-full px-3 py-1.5 bg-slate-50 dark:bg-[#182032] border border-[#e2e4e9] dark:border-[#1e283d] rounded-md text-slate-900 dark:text-white"
         />
       </div>
 
-      <div className="grid grid-cols-3 gap-3">
+      <div className="grid grid-cols-2 gap-3">
         <div>
           <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">
             2. Start Month *
@@ -461,10 +671,7 @@ const MonthlyDifferentPlanForm = ({ addGroup, onClose }) => {
             type="month"
             required
             value={startMonth}
-            onChange={(e) => {
-              setStartMonth(e.target.value);
-              handleRegenerateCalendar(e.target.value, duration, baseContribution);
-            }}
+            onChange={(e) => handleStartMonthChange(e.target.value)}
             className="w-full px-3 py-1.5 bg-slate-50 dark:bg-[#182032] border border-[#e2e4e9] dark:border-[#1e283d] rounded-md text-slate-900 dark:text-white"
           />
         </div>
@@ -479,30 +686,8 @@ const MonthlyDifferentPlanForm = ({ addGroup, onClose }) => {
             max="60"
             required
             value={duration}
-            onChange={(e) => {
-              const d = Number(e.target.value);
-              setDuration(d);
-              handleRegenerateCalendar(startMonth, d, baseContribution);
-            }}
+            onChange={(e) => handleDurationChange(Number(e.target.value))}
             className="w-full px-3 py-1.5 bg-slate-50 dark:bg-[#182032] border border-[#e2e4e9] dark:border-[#1e283d] rounded-md text-slate-900 dark:text-white"
-          />
-        </div>
-
-        <div>
-          <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">
-            Base Monthly (INR) *
-          </label>
-          <input
-            type="number"
-            min="1000"
-            required
-            value={baseContribution}
-            onChange={(e) => {
-              const b = Number(e.target.value);
-              setBaseContribution(b);
-              handleRegenerateCalendar(startMonth, duration, b);
-            }}
-            className="w-full px-3 py-1.5 bg-slate-50 dark:bg-[#182032] border border-[#e2e4e9] dark:border-[#1e283d] rounded-md text-slate-900 dark:text-white font-mono"
           />
         </div>
       </div>
@@ -513,10 +698,10 @@ const MonthlyDifferentPlanForm = ({ addGroup, onClose }) => {
           <div>
             <span className="font-bold text-slate-900 dark:text-white flex items-center gap-1.5">
               <Calendar className="w-3.5 h-3.5 text-purple-600" />
-              <span>4. Chit Calendar (Schedule & Variable Pay)</span>
+              <span>4. Chit Calendar Schedule</span>
             </span>
             <span className="text-[10px] text-slate-500 block">
-              Auto generated from {startMonth}. Edit custom installment rates below if needed:
+              Auto generated from {startMonth}. Enter specific monthly contribution and payable amount independently:
             </span>
           </div>
           <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-purple-100 dark:bg-purple-900 text-purple-700 dark:text-purple-300 font-semibold">
@@ -524,13 +709,13 @@ const MonthlyDifferentPlanForm = ({ addGroup, onClose }) => {
           </span>
         </div>
 
-        <div className="max-h-40 overflow-y-auto">
+        <div className="max-h-48 overflow-y-auto">
           <table className="w-full text-left text-xs border-collapse">
             <thead className="bg-slate-100 dark:bg-slate-800 text-[10px] uppercase text-slate-500 font-mono sticky top-0">
               <tr>
                 <th className="px-3 py-1.5">Month</th>
-                <th className="px-3 py-1.5">Monthly Contribution</th>
-                <th className="px-3 py-1.5">Amt Need To Pay (Post-Dividend)</th>
+                <th className="px-3 py-1.5">Monthly Contribution (INR)</th>
+                <th className="px-3 py-1.5">Amt Need To Pay (INR)</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-[#e2e4e9] dark:divide-[#1e283d] bg-white dark:bg-[#111625]">
@@ -542,17 +727,19 @@ const MonthlyDifferentPlanForm = ({ addGroup, onClose }) => {
                   <td className="px-3 py-1">
                     <input
                       type="number"
+                      placeholder="Enter Cons"
                       value={row.monthlyContribution}
                       onChange={(e) => handleRowChange(idx, 'monthlyContribution', e.target.value)}
-                      className="w-28 px-2 py-0.5 border border-slate-200 dark:border-slate-700 rounded bg-slate-50 dark:bg-slate-900 font-mono"
+                      className="w-32 px-2 py-0.5 border border-slate-200 dark:border-slate-700 rounded bg-slate-50 dark:bg-slate-900 font-mono text-slate-900 dark:text-white"
                     />
                   </td>
                   <td className="px-3 py-1">
                     <input
                       type="number"
+                      placeholder="Enter Payable"
                       value={row.amtNeedToPay}
                       onChange={(e) => handleRowChange(idx, 'amtNeedToPay', e.target.value)}
-                      className="w-28 px-2 py-0.5 border border-indigo-200 dark:border-indigo-800 rounded bg-indigo-50/50 dark:bg-indigo-950/40 text-indigo-700 dark:text-indigo-300 font-mono font-semibold"
+                      className="w-32 px-2 py-0.5 border border-indigo-200 dark:border-indigo-800 rounded bg-indigo-50/50 dark:bg-indigo-950/40 text-indigo-700 dark:text-indigo-300 font-mono font-semibold"
                     />
                   </td>
                 </tr>
@@ -625,7 +812,7 @@ const MonthlyDifferentPlanForm = ({ addGroup, onClose }) => {
             className="w-full px-3 py-1.5 bg-slate-50 dark:bg-[#182032] border border-[#e2e4e9] dark:border-[#1e283d] rounded-md text-slate-900 dark:text-white font-mono"
           />
           <span className="text-[10px] text-slate-400 mt-0.5 block">
-            Day of every month when auction winner receives disbursement.
+            Day of every month when disbursement is distributed.
           </span>
         </div>
       </div>
@@ -643,7 +830,7 @@ const MonthlyDifferentPlanForm = ({ addGroup, onClose }) => {
           className="px-4 py-1.5 font-semibold text-white bg-purple-600 hover:bg-purple-700 rounded-md shadow-xs flex items-center gap-1.5"
         >
           <Sparkles className="w-3.5 h-3.5" />
-          <span>Create Variable Auction Plan</span>
+          <span>Create Variable Schedule Plan</span>
         </button>
       </div>
     </form>

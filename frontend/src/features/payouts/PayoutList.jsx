@@ -30,6 +30,15 @@ export const PayoutList = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedGroupFilter, setSelectedGroupFilter] = useState('ALL');
 
+  // Filter groups: Only Auction & Payout circles
+  const auctionGroups = groups.filter((g) => {
+    if (g.distributionCategory) {
+      return g.distributionCategory === 'AUCTION_PAYOUT';
+    }
+    // Fallback for legacy seeds: if not specified or variable
+    return g.planType === 'MONTHLY_DIFFERENT' || g.id === 'GRP-2026-002' || g.id === 'GRP-2026-003';
+  });
+
   const filteredPayouts = payouts.filter((p) => {
     if (selectedGroupFilter !== 'ALL' && p.groupId !== selectedGroupFilter) return false;
     return true;
@@ -139,8 +148,8 @@ export const PayoutList = () => {
             onChange={(e) => setSelectedGroupFilter(e.target.value)}
             className="bg-slate-50 dark:bg-[#182032] border border-[#e2e4e9] dark:border-[#1e283d] rounded-md px-2.5 py-1 text-slate-700 dark:text-slate-300"
           >
-            <option value="ALL">All Chit Circles</option>
-            {groups.map((g) => (
+            <option value="ALL">All Auction Circles</option>
+            {auctionGroups.map((g) => (
               <option key={g.id} value={g.id}>
                 {g.name}
               </option>
@@ -371,10 +380,10 @@ const CreatePayoutModal = ({ isOpen, onClose }) => {
                 }}
                 className="w-full px-3 py-1.5 bg-slate-50 dark:bg-[#182032] border border-[#e2e4e9] dark:border-[#1e283d] rounded-md text-slate-900 dark:text-white"
               >
-                <option value="">-- Select Group --</option>
-                {groups.map((g) => (
+                <option value="">-- Select Auction Chit Circle --</option>
+                {auctionGroups.map((g) => (
                   <option key={g.id} value={g.id}>
-                    {g.name}
+                    {g.name} ({g.id})
                   </option>
                 ))}
               </select>

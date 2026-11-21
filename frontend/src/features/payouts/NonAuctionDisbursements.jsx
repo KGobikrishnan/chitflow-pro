@@ -29,8 +29,14 @@ export const NonAuctionDisbursements = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedGroupFilter, setSelectedGroupFilter] = useState('ALL');
 
-  // Filter groups: Non-Auction chits (or Standard plans)
-  const nonAuctionGroups = groups.filter((g) => g.planType !== 'MONTHLY_DIFFERENT');
+  // Filter groups: Non-Auction payment circles only
+  const nonAuctionGroups = groups.filter((g) => {
+    if (g.distributionCategory) {
+      return g.distributionCategory === 'NON_AUCTION';
+    }
+    // Fallback for legacy seeds
+    return g.planType !== 'MONTHLY_DIFFERENT' && g.id !== 'GRP-2026-002';
+  });
 
   const filteredPayments = nonAuctionPayments.filter((p) => {
     if (selectedGroupFilter !== 'ALL' && p.groupId !== selectedGroupFilter) return false;
@@ -130,8 +136,8 @@ export const NonAuctionDisbursements = () => {
             onChange={(e) => setSelectedGroupFilter(e.target.value)}
             className="bg-slate-50 dark:bg-[#182032] border border-[#e2e4e9] dark:border-[#1e283d] rounded-md px-2.5 py-1 text-slate-700 dark:text-slate-300"
           >
-            <option value="ALL">All Chit Circles</option>
-            {groups.map((g) => (
+            <option value="ALL">All Non-Auction Circles</option>
+            {nonAuctionGroups.map((g) => (
               <option key={g.id} value={g.id}>
                 {g.name}
               </option>
@@ -222,6 +228,14 @@ const RecordNonAuctionPaymentModal = ({ isOpen, onClose }) => {
   const members = useAppStore((state) => state.members);
   const addNonAuctionPayment = useAppStore((state) => state.addNonAuctionPayment);
 
+  // Filter groups strictly to Non-Auction category
+  const nonAuctionGroups = groups.filter((g) => {
+    if (g.distributionCategory) {
+      return g.distributionCategory === 'NON_AUCTION';
+    }
+    return g.planType !== 'MONTHLY_DIFFERENT' && g.id !== 'GRP-2026-002';
+  });
+
   const [selectedGroupId, setSelectedGroupId] = useState('');
   const [selectedMemberId, setSelectedMemberId] = useState('');
   const [month, setMonth] = useState(new Date().toISOString().substring(0, 7));
@@ -308,10 +322,10 @@ const RecordNonAuctionPaymentModal = ({ isOpen, onClose }) => {
               required
               className="w-full px-3 py-1.5 bg-slate-50 dark:bg-[#182032] border border-[#e2e4e9] dark:border-[#1e283d] rounded-md text-slate-900 dark:text-white"
             >
-              <option value="">-- Choose Chit Circle --</option>
-              {groups.map((g) => (
+              <option value="">-- Choose Non-Auction Chit Circle --</option>
+              {nonAuctionGroups.map((g) => (
                 <option key={g.id} value={g.id}>
-                  {g.name} ({g.id}) [{g.planType || 'STANDARD'}]
+                  {g.name} ({g.id})
                 </option>
               ))}
             </select>

@@ -278,6 +278,14 @@ const CreateGiftSchemeModal = ({ isOpen, onClose }) => {
   const members = useAppStore((state) => state.members);
   const addGiftScheme = useAppStore((state) => state.addGiftScheme);
 
+  // Filter groups strictly to Gift & Payable category
+  const giftEligibleGroups = groups.filter((g) => {
+    if (g.distributionCategory) {
+      return g.distributionCategory === 'GIFT_PAYABLE';
+    }
+    return g.id === 'GRP-2026-001' || g.planType === 'STANDARD';
+  });
+
   const [selectedGroupId, setSelectedGroupId] = useState('');
   const [giftName, setGiftName] = useState('1 Gram Gold Coin (916 KDM)');
   const [payable, setPayable] = useState(5000);
@@ -347,14 +355,24 @@ const CreateGiftSchemeModal = ({ isOpen, onClose }) => {
             </label>
             <select
               value={selectedGroupId}
-              onChange={(e) => setSelectedGroupId(e.target.value)}
+              onChange={(e) => {
+                setSelectedGroupId(e.target.value);
+                const chosenGroup = groups.find((g) => g.id === e.target.value);
+                // Pre-populate gifts if defined in chit group creation
+                if (chosenGroup?.giftItems && chosenGroup.giftItems.length > 0) {
+                  const giftTitles = chosenGroup.giftItems.map((gi) => gi.title).filter(Boolean).join(', ');
+                  if (giftTitles) setGiftName(giftTitles);
+                  const totalExtra = chosenGroup.giftItems.reduce((sum, gi) => sum + (Number(gi.extraCash) || 0), 0);
+                  if (totalExtra > 0) setPayable(totalExtra);
+                }
+              }}
               required
               className="w-full px-3 py-1.5 bg-slate-50 dark:bg-[#182032] border border-[#e2e4e9] dark:border-[#1e283d] rounded-md text-slate-900 dark:text-white"
             >
-              <option value="">-- Choose Chit Circle --</option>
-              {groups.map((g) => (
+              <option value="">-- Choose Gift & Payable Chit Circle --</option>
+              {giftEligibleGroups.map((g) => (
                 <option key={g.id} value={g.id}>
-                  {g.name} ({g.id}) [{g.planType || 'STANDARD'}]
+                  {g.name} ({g.id})
                 </option>
               ))}
             </select>

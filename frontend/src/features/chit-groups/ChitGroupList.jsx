@@ -107,15 +107,23 @@ export const ChitGroupList = () => {
                   <div>
                     <div className="flex items-center space-x-1.5">
                       <span className="text-slate-400 text-[10px] uppercase font-mono">
-                        {group.planType === 'STANDARD' ? 'Standard Plan' : 'Variable Auction Plan'}
+                        {group.distributionCategory === 'NON_AUCTION'
+                          ? 'Non-Auction'
+                          : group.distributionCategory === 'GIFT_PAYABLE'
+                          ? 'Gift & Payable'
+                          : 'Auction & Payouts'}
                       </span>
-                      {group.planType === 'STANDARD' ? (
-                        <span className="px-1.5 py-0.2 rounded text-[9px] bg-indigo-100 dark:bg-indigo-900/60 text-indigo-700 dark:text-indigo-300 font-semibold">
+                      {group.distributionCategory === 'GIFT_PAYABLE' ? (
+                        <span className="px-1.5 py-0.2 rounded text-[9px] bg-amber-100 dark:bg-amber-900/60 text-amber-700 dark:text-amber-300 font-semibold">
                           Gifts
+                        </span>
+                      ) : group.distributionCategory === 'NON_AUCTION' ? (
+                        <span className="px-1.5 py-0.2 rounded text-[9px] bg-indigo-100 dark:bg-indigo-900/60 text-indigo-700 dark:text-indigo-300 font-semibold">
+                          Fixed
                         </span>
                       ) : (
                         <span className="px-1.5 py-0.2 rounded text-[9px] bg-purple-100 dark:bg-purple-900/60 text-purple-700 dark:text-purple-300 font-semibold">
-                          Auctions
+                          Auction
                         </span>
                       )}
                     </div>
