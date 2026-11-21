@@ -330,8 +330,14 @@ export const CreateGroupModal = ({ isOpen, onClose }) => {
 
 /**
  * 1. Standard Chit Plan Form
+ * Per user instructions:
+ * - A standard fixed contribution amount is collected regularly every month.
+ * - Distribution schedule varies per month! (e.g. Month 1: ₹3,00,000, Month 2: ₹50,000, Month 3: ₹1,50,000, Month 4: ₹2,00,000...)
+ * - User can optionally assign or specify the fixed payout amount and target winning member for each month beforehand.
+ * - This provides an aligned Chit Payout Delivery Calendar matching custom customer commitments!
  */
 const StandardPlanForm = ({ addGroup, distributionCategory, giftItems, onClose }) => {
+  const members = useAppStore((state) => state.members);
   const [chitName, setChitName] = useState('');
   const [monthlyContribution, setMonthlyContribution] = useState(10000);
   const [duration, setDuration] = useState(20);
@@ -340,6 +346,71 @@ const StandardPlanForm = ({ addGroup, distributionCategory, giftItems, onClose }
   const [monthlyDueDay, setMonthlyDueDay] = useState(10);
   const [gracePeriod, setGracePeriod] = useState(5);
   const [description, setDescription] = useState('');
+
+  // Fixed Standard Chit Payout Schedule per month
+  const [payoutSchedule, setPayoutSchedule] = useState(() => {
+    return generateStandardPayoutSchedule(startDate, duration, 10000);
+  });
+
+  function generateStandardPayoutSchedule(stDate, dur, monthlyCons, existingRows = []) {
+    const rows = [];
+    const stMonth = stDate ? stDate.substring(0, 7) : new Date().toISOString().substring(0, 7);
+    const [yearStr, monthStr] = stMonth.split('-');
+    let currYear = parseInt(yearStr, 10);
+    let currMonth = parseInt(monthStr, 10);
+
+    for (let i = 0; i < dur; i++) {
+      const monthDisplay = `${currYear}-${String(currMonth).padStart(2, '0')}`;
+      const existing = existingRows[i];
+
+      rows.push({
+        monthIndex: i + 1,
+        monthName: monthDisplay,
+        // Standard regular monthly collection amount
+        monthlyContribution: monthlyCons,
+        // Pre-fixed customer payout disbursement amount for this month
+        scheduledPayoutAmount: existing ? existing.scheduledPayoutAmount : '',
+        recipientNote: existing ? existing.recipientNote || '' : '',
+      });
+
+      currMonth++;
+      if (currMonth > 12) {
+        currMonth = 1;
+        currYear++;
+      }
+    }
+    return rows;
+  }
+
+  // Handle start date or duration changes while preserving user entered payout schedule
+  const handleStartDateChange = (newStDate) => {
+    setStartDate(newStDate);
+    setPayoutSchedule(generateStandardPayoutSchedule(newStDate, duration, monthlyContribution, payoutSchedule));
+  };
+
+  const handleDurationChange = (newDur) => {
+    setDuration(newDur);
+    setPayoutSchedule(generateStandardPayoutSchedule(startDate, newDur, monthlyContribution, payoutSchedule));
+  };
+
+  const handleMonthlyContributionChange = (newCons) => {
+    setMonthlyContribution(newCons);
+    setPayoutSchedule((prev) =>
+      prev.map((row) => ({
+        ...row,
+        monthlyContribution: newCons,
+      }))
+    );
+  };
+
+  const handleScheduleRowChange = (index, field, value) => {
+    const updated = [...payoutSchedule];
+    updated[index] = {
+      ...updated[index],
+      [field]: field === 'scheduledPayoutAmount' ? (value === '' ? '' : Number(value)) : value,
+    };
+    setPayoutSchedule(updated);
+  };
 
   const totalChitValue = Number(monthlyContribution || 0) * Number(duration || 0);
   const endDate = calculateEndDate(startDate, duration);
@@ -366,6 +437,11 @@ const StandardPlanForm = ({ addGroup, distributionCategory, giftItems, onClose }
         startDate,
         collectionDueDate: Number(monthlyDueDay),
         gracePeriodDays: Number(gracePeriod),
+        payoutSchedule: payoutSchedule.map((r) => ({
+          ...r,
+          monthlyContribution: Number(r.monthlyContribution) || Number(monthlyContribution),
+          scheduledPayoutAmount: Number(r.scheduledPayoutAmount) || 0,
+        })),
         description: description || `Standard Chit Scheme under ${distributionCategory} allocation`,
         status: 'ACTIVE',
       });
@@ -395,14 +471,14 @@ const StandardPlanForm = ({ addGroup, distributionCategory, giftItems, onClose }
       <div className="grid grid-cols-2 gap-3">
         <div>
           <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">
-            2. Monthly Contribution (INR) *
+            2. Standard Monthly Contribution (INR) *
           </label>
           <input
             type="number"
             min="100"
             required
             value={monthlyContribution}
-            onChange={(e) => setMonthlyContribution(Number(e.target.value))}
+            onChange={(e) => handleMonthlyContributionChange(Number(e.target.value))}
             className="w-full px-3 py-1.5 bg-slate-50 dark:bg-[#182032] border border-[#e2e4e9] dark:border-[#1e283d] rounded-md text-slate-900 dark:text-white font-mono"
           />
         </div>
@@ -417,7 +493,7 @@ const StandardPlanForm = ({ addGroup, distributionCategory, giftItems, onClose }
             max="120"
             required
             value={duration}
-            onChange={(e) => setDuration(Number(e.target.value))}
+            onChange={(e) => handleDurationChange(Number(e.target.value))}
             className="w-full px-3 py-1.5 bg-slate-50 dark:bg-[#182032] border border-[#e2e4e9] dark:border-[#1e283d] rounded-md text-slate-900 dark:text-white"
           />
         </div>
@@ -438,6 +514,67 @@ const StandardPlanForm = ({ addGroup, distributionCategory, giftItems, onClose }
           <span className="text-xs font-semibold text-slate-800 dark:text-slate-200 font-mono">
             {endDate}
           </span>
+        </div>
+      </div>
+
+      {/* STANDARD CHIT MONTHLY PAYOUT CALENDAR (Variable Payout Delivery Schedule) */}
+      <div className="border border-[#e2e4e9] dark:border-[#1e283d] rounded-lg overflow-hidden bg-slate-50 dark:bg-[#131929]">
+        <div className="p-2.5 bg-indigo-50/80 dark:bg-indigo-950/40 border-b border-[#e2e4e9] dark:border-[#1e283d] flex justify-between items-center">
+          <div>
+            <span className="font-bold text-slate-900 dark:text-white flex items-center gap-1.5">
+              <Calendar className="w-3.5 h-3.5 text-indigo-600" />
+              <span>Standard Chit Monthly Payout Delivery Schedule</span>
+            </span>
+            <span className="text-[10px] text-slate-500 block">
+              Regular collection is ₹{Number(monthlyContribution).toLocaleString('en-IN')}/mo. Enter pre-fixed payout amount & recipient for each month:
+            </span>
+          </div>
+          <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-indigo-100 dark:bg-indigo-900 text-indigo-700 dark:text-indigo-300 font-semibold">
+            {payoutSchedule.length} Months
+          </span>
+        </div>
+
+        <div className="max-h-48 overflow-y-auto">
+          <table className="w-full text-left text-xs border-collapse">
+            <thead className="bg-slate-100 dark:bg-slate-800 text-[10px] uppercase text-slate-500 font-mono sticky top-0">
+              <tr>
+                <th className="px-3 py-1.5">Month</th>
+                <th className="px-3 py-1.5">Regular Collection</th>
+                <th className="px-3 py-1.5">Fixed Payout Amount (INR)</th>
+                <th className="px-3 py-1.5">Designated Recipient / Note</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-[#e2e4e9] dark:divide-[#1e283d] bg-white dark:bg-[#111625]">
+              {payoutSchedule.map((row, idx) => (
+                <tr key={idx} className="hover:bg-slate-50 dark:hover:bg-[#182032]">
+                  <td className="px-3 py-1 font-mono font-medium text-slate-800 dark:text-slate-200">
+                    #{row.monthIndex} ({row.monthName})
+                  </td>
+                  <td className="px-3 py-1 font-mono text-slate-600 dark:text-slate-400">
+                    ₹{Number(row.monthlyContribution).toLocaleString('en-IN')}
+                  </td>
+                  <td className="px-3 py-1">
+                    <input
+                      type="number"
+                      placeholder="e.g. 300000 or 50000"
+                      value={row.scheduledPayoutAmount}
+                      onChange={(e) => handleScheduleRowChange(idx, 'scheduledPayoutAmount', e.target.value)}
+                      className="w-36 px-2 py-0.5 border border-indigo-200 dark:border-indigo-800 rounded bg-indigo-50/50 dark:bg-indigo-950/40 text-indigo-700 dark:text-indigo-300 font-mono font-semibold"
+                    />
+                  </td>
+                  <td className="px-3 py-1">
+                    <input
+                      type="text"
+                      placeholder="e.g. Balasubramaniam (Month 1 priority)"
+                      value={row.recipientNote}
+                      onChange={(e) => handleScheduleRowChange(idx, 'recipientNote', e.target.value)}
+                      className="w-full px-2 py-0.5 border border-slate-200 dark:border-slate-700 rounded bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-white"
+                    />
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       </div>
 
@@ -464,7 +601,7 @@ const StandardPlanForm = ({ addGroup, distributionCategory, giftItems, onClose }
             type="date"
             required
             value={startDate}
-            onChange={(e) => setStartDate(e.target.value)}
+            onChange={(e) => handleStartDateChange(e.target.value)}
             className="w-full px-3 py-1.5 bg-slate-50 dark:bg-[#182032] border border-[#e2e4e9] dark:border-[#1e283d] rounded-md text-slate-900 dark:text-white"
           />
         </div>

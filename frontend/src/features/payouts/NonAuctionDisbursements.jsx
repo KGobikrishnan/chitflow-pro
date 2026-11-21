@@ -258,7 +258,24 @@ const RecordNonAuctionPaymentModal = ({ isOpen, onClose }) => {
     const grp = groups.find((g) => g.id === groupId);
     if (grp) {
       setGrossChitAmt(grp.chitValue || '');
-      setReceiverAmt(grp.chitValue || '');
+      // Check if standard plan has a designated scheduled payout for the current month
+      const scheduledRow = grp.payoutSchedule?.find((row) => row.monthName === month);
+      if (scheduledRow && scheduledRow.scheduledPayoutAmount) {
+        setReceiverAmt(scheduledRow.scheduledPayoutAmount);
+      } else {
+        setReceiverAmt(grp.chitValue || '');
+      }
+    }
+  };
+
+  const handleMonthChange = (newMonth) => {
+    setMonth(newMonth);
+    const grp = groups.find((g) => g.id === selectedGroupId);
+    if (grp && grp.payoutSchedule) {
+      const scheduledRow = grp.payoutSchedule.find((row) => row.monthName === newMonth);
+      if (scheduledRow && scheduledRow.scheduledPayoutAmount) {
+        setReceiverAmt(scheduledRow.scheduledPayoutAmount);
+      }
     }
   };
 
@@ -356,14 +373,29 @@ const RecordNonAuctionPaymentModal = ({ isOpen, onClose }) => {
 
           {/* 3. Month */}
           <div>
-            <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">
-              3. Month *
-            </label>
+            <div className="flex items-center justify-between mb-1">
+              <label className="font-semibold text-slate-700 dark:text-slate-300">
+                3. Month *
+              </label>
+              {selectedGroupId && (() => {
+                const grp = groups.find((g) => g.id === selectedGroupId);
+                const scheduledRow = grp?.payoutSchedule?.find((row) => row.monthName === month);
+                if (scheduledRow?.scheduledPayoutAmount) {
+                  return (
+                    <span className="text-[10px] font-mono text-indigo-600 dark:text-indigo-400 font-semibold">
+                      Pre-fixed Payout: ₹{Number(scheduledRow.scheduledPayoutAmount).toLocaleString('en-IN')}
+                      {scheduledRow.recipientNote ? ` (${scheduledRow.recipientNote})` : ''}
+                    </span>
+                  );
+                }
+                return null;
+              })()}
+            </div>
             <input
               type="month"
               required
               value={month}
-              onChange={(e) => setMonth(e.target.value)}
+              onChange={(e) => handleMonthChange(e.target.value)}
               className="w-full px-3 py-1.5 bg-slate-50 dark:bg-[#182032] border border-[#e2e4e9] dark:border-[#1e283d] rounded-md text-slate-900 dark:text-white"
             />
           </div>
